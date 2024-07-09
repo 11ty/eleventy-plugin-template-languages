@@ -1,6 +1,6 @@
 const ejs = require("ejs");
 
-module.exports = function(eleventyConfig, options = {}) {
+module.exports = function (eleventyConfig, options = {}) {
 	options = Object.assign(
 		{
 			// Makes more sense as `input`, but backwards compat here
@@ -16,7 +16,7 @@ module.exports = function(eleventyConfig, options = {}) {
 			// Override the ejs instance
 			eleventyLibraryOverride: undefined,
 		},
-		options || {}
+		options || {},
 	);
 
 	// Remove eleventy specific things from `options`
@@ -33,6 +33,6 @@ module.exports = function(eleventyConfig, options = {}) {
 			}
 
 			return (libraryOverride || ejs).compile(str, compiledOptions);
-		}
-	})
-}
+		},
+	});
+};
