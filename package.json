@@ -13,6 +13,6 @@
 		"@11ty/eleventy": "^3.0.0-alpha.14"
 	},
 	"devDependencies": {
-		"@11ty/eleventy": "file:../eleventy"
+		"@11ty/eleventy": "^3.0.0-alpha.14"
 	}
 }
