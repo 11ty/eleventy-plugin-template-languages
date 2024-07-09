@@ -1,7 +1,7 @@
 {
 	"name": "@11ty/eleventy-plugin-ejs",
 	"version": "1.0.0-alpha.1",
-	"description": "The `ejs` template syntax plugin for Eleventy v3 and newer.",
+	"description": "The `ejs` template language plugin for Eleventy v3 and newer.",
 	"main": "ejsConfig.js",
 	"type": "commonjs",
 	"engines": {
