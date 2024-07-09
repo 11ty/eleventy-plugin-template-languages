@@ -3,7 +3,7 @@
 Adds support for `.ejs` (Embedded JavaScript templates) files in Eleventy v3.0 and newer. Support for [`ejs` was moved out of core as part of Project Slipstream](https://github.com/11ty/eleventy/pull/3074).
 
 - 11ty Docs https://www.11ty.dev/docs/languages/ejs/
-- `ejs` package on npm: https://github.com/mde/ejs
+- `ejs` package: https://github.com/mde/ejs
 
 ## Installation
 
