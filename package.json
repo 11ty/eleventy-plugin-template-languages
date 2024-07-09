@@ -1,0 +1,18 @@
+{
+	"private": true,
+	"workspaces": [
+		"packages/*"
+	],
+	"type": "module",
+	"scripts": {
+		"test-coverage": "node --test --experimental-test-coverage --test-reporter=spec",
+		"test": "node --test"
+	},
+	"license": "MIT",
+	"peerDependencies": {
+		"@11ty/eleventy": "^3.0.0-alpha.14"
+	},
+	"devDependencies": {
+		"@11ty/eleventy": "file:../eleventy"
+	}
+}
