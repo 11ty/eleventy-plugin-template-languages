@@ -27,12 +27,9 @@ module.exports = function(eleventyConfig, options = {}) {
 
 	eleventyConfig.addExtension("ejs", {
 		compile: (str, inputPath) => {
-			let compiledOptions;
+			let compiledOptions = Object.assign({}, options);
 			if (inputPath) {
-				compiledOptions = Object.assign({}, options);
 				compiledOptions.filename = inputPath;
-			} else {
-				compiledOptions = options;
 			}
 
 			return (libraryOverride || ejs).compile(str, compiledOptions);
