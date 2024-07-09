@@ -1,13 +1,18 @@
 import {strictEqual} from "node:assert";
 import { after, before, test, describe } from "node:test";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import ejs from "ejs";
 import Eleventy from "@11ty/eleventy";
 
 import EjsPlugin from "../ejsConfig.js";
 
+const dirname = path.dirname(import.meta.url);
+const input = fileURLToPath(path.join(dirname, "stubs"));
+
 async function getTestResults(configCallback, options = {}) {
-	let elev = new Eleventy(import.meta.dirname + "/stubs/", undefined, {
+	let elev = new Eleventy(input, undefined, {
 		config: eleventyConfig => {
 			eleventyConfig.addPlugin(EjsPlugin, options);
 
