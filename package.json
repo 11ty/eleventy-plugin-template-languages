@@ -1,7 +1,8 @@
 {
 	"private": true,
 	"workspaces": [
-		"ejs"
+		"ejs",
+		"handlebars"
 	],
 	"type": "module",
 	"scripts": {
