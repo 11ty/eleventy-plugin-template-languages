@@ -3,7 +3,8 @@
 	"workspaces": [
 		"ejs",
 		"handlebars",
-		"mustache"
+		"mustache",
+		"haml"
 	],
 	"type": "module",
 	"scripts": {
