@@ -33,6 +33,17 @@ test("Handlebars standard template", async function () {
 	strictEqual(result.content, `<p>Zach</p>`);
 });
 
+test("Handlebars permalink", async function () {
+	let [result] = await getTestResults((eleventyConfig) => {
+		eleventyConfig.addTemplate("sample.hbs", "<p>{{ name }}</p>", {
+			name: "this-is-a-url",
+			permalink: "/{{name}}/"
+		});
+	});
+
+	strictEqual(result.url, `/this-is-a-url/`);
+});
+
 describe("Escaped and unescaped output", () => {
 
 	test("Handlebars unescaped output (no HTML)", async function () {

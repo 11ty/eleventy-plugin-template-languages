@@ -33,6 +33,17 @@ test("Mustache standard template", async function () {
 	strictEqual(result.content, `<p>Zach</p>`);
 });
 
+test("Mustache permalink", async function () {
+	let [result] = await getTestResults((eleventyConfig) => {
+		eleventyConfig.addTemplate("sample.mustache", "<p>{{ name }}</p>", {
+			name: "this-is-a-url",
+			permalink: "/{{name}}/"
+		});
+	});
+
+	strictEqual(result.url, `/this-is-a-url/`);
+});
+
 describe("Partials", () => {
 	test("Partial raw text", async function () {
 		let [result] = await getTestResults((eleventyConfig) => {

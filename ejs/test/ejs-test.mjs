@@ -33,6 +33,18 @@ test("EJS standard template", async function () {
 	strictEqual(result.content, `<p>Zach</p>`);
 });
 
+test("EJS permalink (should be raw text)", async function () {
+	let [result] = await getTestResults((eleventyConfig) => {
+		eleventyConfig.addTemplate("sample.ejs", "", {
+			name: "this-is-a-url",
+			permalink: "/<%= name %>/"
+		});
+	});
+
+	strictEqual(result.url, `/this-is-a-url/`);
+});
+
+
 test("EJS template with front matter", async function () {
 	let [result] = await getTestResults((eleventyConfig) => {
 		eleventyConfig.addTemplate(

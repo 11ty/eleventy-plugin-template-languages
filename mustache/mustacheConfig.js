@@ -69,7 +69,7 @@ async function getPartials(directories, extensions) {
 module.exports = function (eleventyConfig, options = {}) {
 	options = Object.assign(
 		{
-			// Override the ejs instance
+			// Override the instance
 			eleventyLibraryOverride: undefined,
 		},
 		options || {},
@@ -98,6 +98,17 @@ module.exports = function (eleventyConfig, options = {}) {
 			let ret = await getPartials(eleventyConfig.directories, ["mustache"]);
 			files = ret.files;
 			partials = ret.partials;
+		},
+		compileOptions: {
+			permalink: (contents, inputPath) => {
+				if(typeof contents === "string") {
+					return function(data) {
+						return (libraryOverride || mustache).render(contents, data, partials);
+					};
+				}
+
+				return contents;
+			}
 		},
 		compile: (str, inputPath) => {
 			return function(data) {

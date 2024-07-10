@@ -127,6 +127,15 @@ module.exports = function (eleventyConfig, options = {}) {
 			files = ret.files;
 			library.registerPartial(ret.partials);
 		},
+		compileOptions: {
+			permalink: (contents, inputPath) => {
+				if(typeof contents === "string") {
+					return library.compile(contents);
+				}
+
+				return contents;
+			}
+		},
 		compile: (str, inputPath) => {
 			return library.compile(str);
 		},

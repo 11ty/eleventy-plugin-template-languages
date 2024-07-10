@@ -26,6 +26,15 @@ module.exports = function (eleventyConfig, options = {}) {
 	eleventyConfig.addTemplateFormats("ejs");
 
 	eleventyConfig.addExtension("ejs", {
+		compileOptions: {
+			permalink: (contents, inputPath) => {
+				if(typeof contents === "string") {
+					return (libraryOverride || ejs).compile(contents, options);
+				}
+
+				return contents;
+			}
+		},
 		compile: (str, inputPath) => {
 			let compiledOptions = Object.assign({}, options);
 			if (inputPath) {
