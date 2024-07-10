@@ -1,9 +1,9 @@
 const fs = require("node:fs");
 
-const handlebars = require("handlebars");
+const mustache = require("mustache");
 const fastglob = require("fast-glob");
 const { TemplatePath } = require("@11ty/eleventy-utils");
-const debug = require("debug")("Eleventy:Handlebars");
+const debug = require("debug")("Eleventy:Mustache");
 
 async function getPartials(directories, extensions) {
 	if (!directories?.includes) {
@@ -67,8 +67,6 @@ async function getPartials(directories, extensions) {
 }
 
 module.exports = function (eleventyConfig, options = {}) {
-	eleventyConfig.versionCheck(">= 3.0.0-alpha.15");
-
 	options = Object.assign(
 		{
 			// Override the ejs instance
@@ -77,58 +75,34 @@ module.exports = function (eleventyConfig, options = {}) {
 		options || {},
 	);
 
-	eleventyConfig.addTemplateFormats("hbs");
-
 	// Remove eleventy specific things from `options`
-	let library = options.eleventyLibraryOverride || handlebars;
+	let libraryOverride = options.eleventyLibraryOverride;
 	delete options.eleventyLibraryOverride;
 
-	// Note: we intentionally load async and sync versions here
-	// as "[Object Promise]" from an async function isn’t worse than "" returned from a missing helper
-
-	// Filters
-	for(let [name, callback] of Object.entries(eleventyConfig.getFilters())) {
-		library.registerHelper(name, callback);
-	}
-
-	// Shortcodes
-	for(let [name, callback] of Object.entries(eleventyConfig.getShortcodes())) {
-		library.registerHelper(name, callback);
-	}
-
-	// Paired Shortcodes
-	for(let [name, callback] of Object.entries(eleventyConfig.getPairedShortcodes())) {
-		library.registerHelper(name, function (...args) {
-			let options = args[args.length - 1];
-			let content = "";
-			if (options && options.fn) {
-				content = options.fn(this);
-			}
-
-			return callback.call(this, content, ...args);
-		});
-
-	}
+	eleventyConfig.addTemplateFormats("mustache");
 
 	// Partials
 	let files = [];
+	let partials = {};
 	eleventyConfig.on("eleventy.resourceModified", async modifiedPath => {
 		if(files.includes(modifiedPath)) {
-			ret = await getPartials(eleventyConfig.directories, ["hbs"]);
+			ret = await getPartials(eleventyConfig.directories, ["mustache"]);
 			files = ret.files;
-			library.registerPartial(ret.partials);
+			partials = ret.partials;
 		}
 	});
 
-	eleventyConfig.addExtension("hbs", {
+	eleventyConfig.addExtension("mustache", {
 		init: async () => {
 			// Cache the partials
-			let ret = await getPartials(eleventyConfig.directories, ["hbs"]);
+			let ret = await getPartials(eleventyConfig.directories, ["mustache"]);
 			files = ret.files;
-			library.registerPartial(ret.partials);
+			partials = ret.partials;
 		},
 		compile: (str, inputPath) => {
-			return library.compile(str);
+			return function(data) {
+				return (libraryOverride || mustache).render(str, data, partials);
+			};
 		},
 	});
 };

@@ -13,5 +13,8 @@ insert_final_newline = false
 [*.ejs]
 insert_final_newline = false
 
+[*.mustache]
+insert_final_newline = false
+
 [*.yml]
 indent_style = space
