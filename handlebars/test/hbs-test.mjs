@@ -110,7 +110,7 @@ test("Handlebars Library Override", async () => {
 	strictEqual(result.content, "<p>Zach</p>");
 });
 
-describe("Handlebars using Universal Filters/Shortcodes", () => {
+describe("Handlebars using Universal Filters", () => {
 	test("Filter", async () => {
 		let [result] = await getTestResults((eleventyConfig) => {
 			eleventyConfig.addFilter("helpername", () => {
@@ -146,7 +146,9 @@ describe("Handlebars using Universal Filters/Shortcodes", () => {
 
 		strictEqual(result.content, "<p>This is a FILTER Not Zach.</p>");
 	});
+});
 
+describe("Handlebars using Universal Shortcodes", () => {
 	test("Shortcode with context vars", async () => {
 		let [result] = await getTestResults((eleventyConfig) => {
 			eleventyConfig.addShortcode("helpername", function() {
@@ -186,64 +188,6 @@ describe("Handlebars using Universal Filters/Shortcodes", () => {
 		});
 
 		strictEqual(result.content, "<p>This is a ZACH HOWDY.</p>");
-	});
-
-
-	test("Paired Shortcode", async () => {
-		let [result] = await getTestResults((eleventyConfig) => {
-			eleventyConfig.addPairedShortcode("helpername", function (content) {
-				// Data in context
-				// Note Handlebars exposes all data while other template languages only expose { page }. See #741
-				strictEqual(this.name, "Zach");
-				strictEqual(this.page.url, "/sample/");
-
-				return `BEFORE${content}AFTER`;
-			});
-
-			eleventyConfig.addTemplate("sample.hbs", "<p>{{#helpername}}{{name}}{{/helpername}}</p>", { name: "Zach" });
-		});
-
-		strictEqual(result.content, "<p>BEFOREZachAFTER</p>");
-	});
-
-	test("Paired Shortcode with HTML content", async () => {
-		let [result] = await getTestResults((eleventyConfig) => {
-			eleventyConfig.addPairedShortcode("helpername", function (content) {
-				return `BEFORE${content}AFTER`;
-			});
-
-			eleventyConfig.addTemplate("sample.hbs", "<p>{{#helpername}}<span>Testing</span>{{/helpername}}</p>", { name: "Zach" });
-		});
-
-		strictEqual(result.content, "<p>BEFORE<span>Testing</span>AFTER</p>");
-	});
-
-	test("Paired Shortcode with HTML content (spaces)", async () => {
-		let [result] = await getTestResults((eleventyConfig) => {
-			eleventyConfig.addPairedShortcode("helpername", function (content, name) {
-				return `BEFORE${name} ${content}AFTER`;
-			});
-
-			eleventyConfig.addTemplate("sample.hbs", "<p>{{# helpername name }}Test{{/ helpername }}</p>", { name: "Zach" });
-		});
-
-		strictEqual(result.content, "<p>BEFOREZach TestAFTER</p>");
-	});
-
-	test("Shortcodes, nested", async () => {
-		let [result] = await getTestResults((eleventyConfig) => {
-			eleventyConfig.addShortcode("child", function (txt) {
-				return txt;
-			});
-
-			eleventyConfig.addPairedShortcode("parent", function (content, name, name2) {
-				return `${content} ${name} ${name2}`;
-			});
-
-			eleventyConfig.addTemplate("sample.hbs", "<p>{{# parent name name2 }}{{child 'Child'}}{{/ parent }}</p>", { name: "Zach", name2: "Howdy" });
-		});
-
-		strictEqual(result.content, "<p>Child Zach Howdy</p>");
 	});
 
 	test("Shortcodes Raw Output Issue #436", async () => {
@@ -287,5 +231,85 @@ describe("Handlebars using Universal Filters/Shortcodes", () => {
 		});
 
 		strictEqual(result.content, `<ul><li><a href=a>Zachtext</a></li></ul>`);
+	});
+
+	test("Async shortcode", async () => {
+		let [result] = await getTestResults((eleventyConfig) => {
+			eleventyConfig.addShortcode("asynchelper", async function() {
+				let ret = await new Promise(resolve => {
+					setTimeout(() => resolve("Hello"), 200);
+				});
+				strictEqual(ret, "Hello");
+				return ret;
+			});
+
+			eleventyConfig.addTemplate("sample.hbs", "<p>This is a {{asynchelper}}.</p>", { name: "Zach" });
+		});
+
+		// Async is not supported
+		// We return the promise here to make it clear that Handlebars isn’t async-friendly.
+		// Alternatively, if we filtered out the async shortcodes it would return "<p>This is a .</p>" which makes less sense.
+		strictEqual(result.content, "<p>This is a [object Promise].</p>");
+	});
+});
+
+describe("Handlebars using Universal Paired Shortcodes", () => {
+	test("Paired Shortcode", async () => {
+		let [result] = await getTestResults((eleventyConfig) => {
+			eleventyConfig.addPairedShortcode("helpername", function (content) {
+				// Data in context
+				// Note Handlebars exposes all data while other template languages only expose { page }. See #741
+				strictEqual(this.name, "Zach");
+				strictEqual(this.page.url, "/sample/");
+
+				return `BEFORE${content}AFTER`;
+			});
+
+			eleventyConfig.addTemplate("sample.hbs", "<p>{{#helpername}}{{name}}{{/helpername}}</p>", { name: "Zach" });
+		});
+
+		strictEqual(result.content, "<p>BEFOREZachAFTER</p>");
+	});
+
+	test("Paired Shortcode with HTML content", async () => {
+		let [result] = await getTestResults((eleventyConfig) => {
+			eleventyConfig.addPairedShortcode("helpername", function (content) {
+				return `BEFORE${content}AFTER`;
+			});
+
+			eleventyConfig.addTemplate("sample.hbs", "<p>{{#helpername}}<span>Testing</span>{{/helpername}}</p>", { name: "Zach" });
+		});
+
+		strictEqual(result.content, "<p>BEFORE<span>Testing</span>AFTER</p>");
+	});
+
+	test("Paired Shortcode with HTML content (spaces)", async () => {
+		let [result] = await getTestResults((eleventyConfig) => {
+			eleventyConfig.addPairedShortcode("helpername", function (content, name) {
+				return `BEFORE${name} ${content}AFTER`;
+			});
+
+			eleventyConfig.addTemplate("sample.hbs", "<p>{{# helpername name }}Test{{/ helpername }}</p>", { name: "Zach" });
+		});
+
+		strictEqual(result.content, "<p>BEFOREZach TestAFTER</p>");
+	});
+});
+
+describe("Handlebars using mixed Shortcodes", () => {
+	test("Shortcodes, nested", async () => {
+		let [result] = await getTestResults((eleventyConfig) => {
+			eleventyConfig.addShortcode("child", function (txt) {
+				return txt;
+			});
+
+			eleventyConfig.addPairedShortcode("parent", function (content, name, name2) {
+				return `${content} ${name} ${name2}`;
+			});
+
+			eleventyConfig.addTemplate("sample.hbs", "<p>{{# parent name name2 }}{{child 'Child'}}{{/ parent }}</p>", { name: "Zach", name2: "Howdy" });
+		});
+
+		strictEqual(result.content, "<p>Child Zach Howdy</p>");
 	});
 });

@@ -83,18 +83,21 @@ module.exports = function (eleventyConfig, options = {}) {
 	let library = options.eleventyLibraryOverride || handlebars;
 	delete options.eleventyLibraryOverride;
 
+	// Note: we intentionally load async and sync versions here
+	// as "[Object Promise]" from an async function isn’t worse than "" returned from a missing helper
+
 	// Filters
-	for(let [name, filter] of Object.entries(eleventyConfig.getFilters())) {
-		library.registerHelper(name, filter);
+	for(let [name, callback] of Object.entries(eleventyConfig.getFilters())) {
+		library.registerHelper(name, callback);
 	}
 
 	// Shortcodes
-	for(let [name, shortcode] of Object.entries(eleventyConfig.getShortcodes())) {
-		library.registerHelper(name, shortcode);
+	for(let [name, callback] of Object.entries(eleventyConfig.getShortcodes())) {
+		library.registerHelper(name, callback);
 	}
 
 	// Paired Shortcodes
-	for(let [name, shortcode] of Object.entries(eleventyConfig.getPairedShortcodes())) {
+	for(let [name, callback] of Object.entries(eleventyConfig.getPairedShortcodes())) {
 		library.registerHelper(name, function (...args) {
 			let options = args[args.length - 1];
 			let content = "";
@@ -102,7 +105,7 @@ module.exports = function (eleventyConfig, options = {}) {
 				content = options.fn(this);
 			}
 
-			return shortcode.call(this, content, ...args);
+			return callback.call(this, content, ...args);
 		});
 
 	}
