@@ -2,6 +2,7 @@
 	"private": true,
 	"workspaces": [
 		"ejs",
+		"jsx",
 		"handlebars",
 		"mustache",
 		"haml"
