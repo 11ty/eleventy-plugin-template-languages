@@ -4,7 +4,8 @@
 		"ejs",
 		"handlebars",
 		"mustache",
-		"haml"
+		"haml",
+		"tsx"
 	],
 	"type": "module",
 	"scripts": {

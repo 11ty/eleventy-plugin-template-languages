@@ -1,0 +1,35 @@
+{
+	"name": "@11ty/eleventy-plugin-jsx",
+	"version": "1.0.0-alpha.1",
+	"description": "The JSX template language plugin for Eleventy v3 and newer.",
+	"main": "tsxConfig.js",
+	"type": "module",
+	"engines": {
+		"node": ">=18"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"files": [
+		"!test"
+	],
+	"funding": {
+		"type": "opencollective",
+		"url": "https://opencollective.com/11ty"
+	},
+	"author": "Zach Leatherman <zach@zachleat.com> (https://zachleat.com/)",
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/11ty/eleventy.git"
+	},
+	"bugs": "https://github.com/11ty/eleventy/issues",
+	"homepage": "https://www.11ty.dev/",
+	"scripts": {
+		"test": "echo \"Error: run tests from root directory\" && exit 1"
+	},
+	"dependencies": {
+		"tsx": "^4.16.2",
+		"typescript": "^5.5.3",
+		"jsx-async-runtime": "^0.4.2"
+	}
+}
