@@ -4,7 +4,8 @@
 		"ejs",
 		"handlebars",
 		"mustache",
-		"haml"
+		"haml",
+		"pug"
 	],
 	"type": "module",
 	"scripts": {
@@ -25,6 +26,7 @@
 		"@eslint/js": "^9.6.0",
 		"eslint": "^9.6.0",
 		"eslint-config-prettier": "^9.1.0",
-		"prettier": "^3.3.2"
+		"prettier": "^3.3.2",
+		"rimraf": "^6.0.1"
 	}
 }
