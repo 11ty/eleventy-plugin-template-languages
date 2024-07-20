@@ -44,7 +44,7 @@ test("Mustache permalink", async function () {
 	strictEqual(result.url, `/this-is-a-url/`);
 });
 
-describe("Partials", () => {
+describe("Mustache Partials", () => {
 	test("Partial raw text", async function () {
 		let [result] = await getTestResults((eleventyConfig) => {
 			eleventyConfig.addTemplate("sample.mustache", "<p>{{> include}}</p>");
@@ -70,7 +70,7 @@ describe("Partials", () => {
 	});
 });
 
-test("Library override", async function () {
+test("Mustache Library override", async function () {
 	let [result] = await getTestResults((eleventyConfig) => {
 		eleventyConfig.addTemplate("sample.mustache", "<p>{{name}}</p>", { name: "Zach" });
 	}, {
@@ -80,7 +80,7 @@ test("Library override", async function () {
 	strictEqual(result.content, `<p>Zach</p>`);
 });
 
-describe("Escaped/unescaped output", () => {
+describe("Mustache Escaped/unescaped output", () => {
 	test("Escaped output (no HTML)", async function () {
 		let [result] = await getTestResults((eleventyConfig) => {
 			eleventyConfig.addTemplate("sample.mustache", "<p>{{{name}}}</p>", { name: "Zach" });

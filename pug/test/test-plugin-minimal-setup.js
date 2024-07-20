@@ -21,7 +21,7 @@ import UserConfig from '@11ty/eleventy/src/UserConfig.js'
 //	I want to be sure it’s solid for Eleventy 3.
 
 
-describe('SCENARIO: Minimal possible setup', function() {
+describe('Pug: Minimal possible setup', function() {
 
 	context('GIVEN a UserConfig', function() {
 		const config = new UserConfig()

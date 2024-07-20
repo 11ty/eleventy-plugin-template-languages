@@ -10,7 +10,7 @@ import {
 import Eleventy from "@11ty/eleventy";
 
 
-describe('SCENARIO: Global Data', function() {
+describe('Pug Global Data', function() {
 	const GLOBAL_DATA_PROJECT_PATH 	= './pug/test-stubs/data-access'
 	const input						= path.join(GLOBAL_DATA_PROJECT_PATH, '_src')
 	const output					= path.join(GLOBAL_DATA_PROJECT_PATH, '_site')
