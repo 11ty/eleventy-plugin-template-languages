@@ -1,6 +1,5 @@
-import {strict as assert} from 'node:assert'
+import {strict as assert, strictEqual as equal} from 'node:assert'
 import fs from 'node:fs'
-import os from 'node:os'
 import path from 'node:path'
 import {
     after,
@@ -9,7 +8,6 @@ import {
     describe as context,
     it
 }   from 'node:test'
-import { rimrafSync } from "rimraf";
 
 //	test subjects
 import plugin from '../index.js'
@@ -47,30 +45,13 @@ describe('SCENARIO: Minimal possible setup', function() {
 		}
 
 		context('WHEN we instantiate Eleventy', function() {
-			before(function cleanPreviousTestOutputDirs() {
-				/* ⚠️ 	CAUTION:
-				 *		Dangerous if you mess with the paths above!
-				 */
-				if (output && fs.existsSync(output)) {
-					rimrafSync(output);
-				}
-			})
-
-			after(function() {
-				/* ⚠️ 	CAUTION:
-				 *		Dangerous if you mess with the paths above!
-				 */
-				if (output && fs.existsSync(output)) {
-					rimrafSync(output);
-				}
-			})
-
 			let eleventyInstance = new Eleventy(input, output, options)
 
 			it('Can build a Pug file', async function() {
-				await eleventyInstance.executeBuild()
-				await assert(fs.existsSync(output), `output did not exist: “${output}”\n`)
-				assert(fs.existsSync(path.resolve(output, 'index.html')))
+				let results = await eleventyInstance.toJSON();
+				equal(results.length, 1);
+				equal(results[0].outputPath, "./pug/test-stubs/minimal/_site/index.html");
+				equal(results[0].url, "/");
 			})
 
 		})
