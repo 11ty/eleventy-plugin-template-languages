@@ -15,7 +15,7 @@ import Eleventy from '@11ty/eleventy'
 
 
 describe('SCENARIO: Global Data Function', function() {
-	const GLOBAL_DATA_PROJECT_PATH 	= './test-stubs/data-functions'
+	const GLOBAL_DATA_PROJECT_PATH 	= './pug/test-stubs/data-functions'
 	const input						= path.join(GLOBAL_DATA_PROJECT_PATH, '_src')
 	const output					= path.join(GLOBAL_DATA_PROJECT_PATH, '_site')
 	const options	= {

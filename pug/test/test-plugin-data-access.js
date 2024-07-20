@@ -15,9 +15,12 @@ import Eleventy from "@11ty/eleventy";
 
 
 describe('SCENARIO: Global Data', function() {
-	const input 	= "./test-stubs/data-access/_src/";
-	const output 	= "./test-stubs/data-access/_site/";
-	const configPath = "./test-stubs/data-access/eleventy.config.js";
+	const GLOBAL_DATA_PROJECT_PATH 	= './pug/test-stubs/data-access'
+	const input						= path.join(GLOBAL_DATA_PROJECT_PATH, '_src')
+	const output					= path.join(GLOBAL_DATA_PROJECT_PATH, '_site')
+	const options	= {
+		configPath: path.join(GLOBAL_DATA_PROJECT_PATH, "eleventy.config.js")
+	}
 
 	context('GIVEN some global data', function() {
 		before(function cleanPreviousTestOutputDirs() {
@@ -38,9 +41,7 @@ describe('SCENARIO: Global Data', function() {
 			}
 		})
 
-		let eleventyInstance = new Eleventy(input, output, {
-			configPath
-		})
+		let eleventyInstance = new Eleventy(input, output, options)
 
 		it('The compilation can use the data ', async function() {
 			await eleventyInstance.executeBuild()

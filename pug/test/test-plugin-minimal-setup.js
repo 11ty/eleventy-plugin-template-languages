@@ -39,7 +39,7 @@ describe('SCENARIO: Minimal possible setup', function() {
 	})
 
 	context('GIVEN a minimal project and config', function() {
-		const GLOBAL_DATA_PROJECT_PATH 	= './test-stubs/minimal'
+		const GLOBAL_DATA_PROJECT_PATH 	= './pug/test-stubs/minimal'
 		const input						= path.join(GLOBAL_DATA_PROJECT_PATH, '_src')
 		const output					= path.join(GLOBAL_DATA_PROJECT_PATH, '_site')
 		const options	= {

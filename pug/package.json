@@ -18,11 +18,9 @@
   "directories": {
     "test": "test"
   },
-  "scripts": {
-    "test": "node --test",
-    "test:cov": "node --test --experimental-test-coverage",
-    "test-watch": "node --test --watch"
-  },
+	"scripts": {
+		"test": "echo \"Error: run tests from root directory\" && exit 1"
+	},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Zearin/eleventy-plugin-pug.git"
