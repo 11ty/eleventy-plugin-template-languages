@@ -155,4 +155,34 @@ block content
 			equal(results[0].content, `<p>ZACH</p>`);
 		})
 	})
+
+	context('Universal filters', function() {
+		const input = './pug/test-stubs/virtual'
+
+		it('Add all universal filters', async function() {
+			let eleventyInstance = new Eleventy(input, undefined, {
+				config: function(eleventyConfig) {
+					// notable: these tests use .eleventyignore to filter out some include files
+					eleventyConfig.addFilter("toUpper", (name) => name.toUpperCase());
+
+					eleventyConfig.addPlugin(plugin, {
+						// synchronous only
+						filters: eleventyConfig.getFilters({ type: "sync" }),
+					});
+
+					eleventyConfig.addTemplate("index.pug", `p
+  :toUpper()
+    Zach
+`, {});
+				}
+			})
+
+			let results = await eleventyInstance.toJSON();
+
+			equal(results.length, 1);
+			equal(results[0].outputPath, "./_site/index.html");
+			equal(results[0].url, "/");
+			equal(results[0].content, `<p>ZACH</p>`);
+		})
+	})
 })
