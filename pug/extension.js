@@ -1,4 +1,3 @@
-import path	from 'node:path'
 import debugUtil from 'debug'
 import pug	from 'pug'
 
@@ -9,7 +8,7 @@ const debug 	= debugUtil('Eleventy:Plugins:Pug')
 const debugDev 	= debugUtil('Dev:Eleventy:Plugins:Pug')
 
 
-export default {
+const extension = {
 	outputFileExtension: 'html',
 	options: DEFAULT_PUG_OPTIONS,
 
@@ -49,8 +48,9 @@ export default {
 			const renderOptions = Object.assign(
 				{},
 				{
-					basedir: 	arg.eleventy.directories.includes,
-					filename: 	inputPath,
+					basedir: arg.eleventy.directories.includes,
+					filename: inputPath,
+					filters: extension.options.filters,
 				},
 				arg
 			)
@@ -71,3 +71,5 @@ export default {
 		}
 	}
 }
+
+export default extension;
