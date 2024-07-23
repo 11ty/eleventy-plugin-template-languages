@@ -1,9 +1,6 @@
-import {strict as assert, strictEqual as equal} from 'node:assert'
-import fs from 'node:fs'
+import {strictEqual as equal} from 'node:assert'
 import path from 'node:path'
 import {
-    after,
-    before,
     describe,
     describe as context,
     it
@@ -27,12 +24,12 @@ describe('Pug: Minimal possible setup', function() {
 		const config = new UserConfig()
 
 		it('it starts with no plugins', function() {
-			assert.equal(config.plugins.length, 0)
+			equal(config.plugins.length, 0)
 		})
 
 		it('runs .addPlugin() successfully', function() {
 			config.addPlugin(plugin)
-			assert.equal(config.plugins.length, 1)
+			equal(config.plugins.length, 1)
 		})
 	})
 
@@ -58,5 +55,5 @@ describe('Pug: Minimal possible setup', function() {
 	})
 })
 
-describe.todo('SCENARIO: Multiple layouts', function() {})
+describe.todo('Pug: Multiple layouts', function() {})
 

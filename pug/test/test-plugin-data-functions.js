@@ -1,4 +1,4 @@
-import {strict as assert, strictEqual as equal} from 'node:assert'
+import {strictEqual as equal} from 'node:assert'
 import path from 'node:path'
 import {
     describe,
