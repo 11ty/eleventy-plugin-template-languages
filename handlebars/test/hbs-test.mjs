@@ -44,9 +44,9 @@ test("Handlebars permalink", async function () {
 	strictEqual(result.url, `/this-is-a-url/`);
 });
 
-describe("Escaped and unescaped output", () => {
+describe("Handlebars Escaped and unescaped output", () => {
 
-	test("Handlebars unescaped output (no HTML)", async function () {
+	test("Unescaped output (no HTML)", async function () {
 		let [result] = await getTestResults((eleventyConfig) => {
 			eleventyConfig.addTemplate("sample.hbs", "<p>{{{name}}}</p>", {
 				name: "Zach",
@@ -56,7 +56,7 @@ describe("Escaped and unescaped output", () => {
 		strictEqual(result.content, `<p>Zach</p>`);
 	});
 
-	test("Handlebars escaped output (HTML)", async function () {
+	test("Escaped output (HTML)", async function () {
 		let [result] = await getTestResults((eleventyConfig) => {
 			eleventyConfig.addTemplate("sample.hbs", "<p>{{name}}</p>", {
 				name: "<b>Zach</b>",
@@ -66,7 +66,7 @@ describe("Escaped and unescaped output", () => {
 		strictEqual(result.content, `<p>&lt;b&gt;Zach&lt;/b&gt;</p>`);
 	});
 
-	test("Handlebars Unescaped Output (HTML)", async function () {
+	test("Unescaped Output (HTML)", async function () {
 		let [result] = await getTestResults((eleventyConfig) => {
 			eleventyConfig.addTemplate("sample.hbs", "<p>{{{name}}}</p>", {
 				name: "<b>Zach</b>",
@@ -78,7 +78,7 @@ describe("Escaped and unescaped output", () => {
 });
 
 describe("Handlebars Partials", () => {
-	test("Handlebars Partial", async function () {
+	test("Partial", async function () {
 		let [result] = await getTestResults((eleventyConfig) => {
 			eleventyConfig.addTemplate("sample.hbs", "<p>{{> included}}</p>", {});
 		});
@@ -86,7 +86,7 @@ describe("Handlebars Partials", () => {
 		strictEqual(result.content, `<p>This is an include.</p>`);
 	});
 
-	test("Handlebars Render Partial (Subdirectory)", async () => {
+	test("Render Partial (Subdirectory)", async () => {
 		let [result] = await getTestResults((eleventyConfig) => {
 			eleventyConfig.addTemplate("sample.hbs", "<p>{{> subfolder/included-subfolder}}</p>", {});
 		});
@@ -94,7 +94,7 @@ describe("Handlebars Partials", () => {
 		strictEqual(result.content, `<p>This is a subfolder include.</p>`);
 	});
 
-	test("Handlebars Partial with variable", async () => {
+	test("Partial with variable", async () => {
 		let [result] = await getTestResults((eleventyConfig) => {
 			eleventyConfig.addTemplate("sample.hbs", "<p>{{> includedvar}}</p>", { name: "Zach" });
 		});
@@ -102,7 +102,7 @@ describe("Handlebars Partials", () => {
 		strictEqual(result.content, "<p>This is a Zach.</p>");
 	});
 
-	test("Handlebars Partial with parameter", async () => {
+	test("Partial with parameter", async () => {
 		let [result] = await getTestResults((eleventyConfig) => {
 			eleventyConfig.addTemplate("sample.hbs", "<p>{{> myPartial parameter=name }}</p>", { name: "Zach" });
 		});

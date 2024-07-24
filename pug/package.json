@@ -1,0 +1,41 @@
+{
+  "name": "@11ty/eleventy-plugin-pug",
+  "version": "0.0.2",
+  "description": "Pug templates for Eleventy 3!",
+  "private": true,
+  "keywords": [
+    "eleventy",
+    "eleventy-plugin",
+    "plugin",
+    "pug",
+    "html",
+    "template",
+    "ssg",
+    "static-site-generator"
+  ],
+  "exports": "./index.js",
+  "type": "module",
+  "directories": {
+    "test": "test"
+  },
+	"scripts": {
+		"test": "echo \"Error: run tests from root directory\" && exit 1"
+	},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zearin/eleventy-plugin-pug.git"
+  },
+  "author": "Zearin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Zearin/eleventy-plugin-pug/issues"
+  },
+  "homepage": "https://github.com/Zearin/eleventy-plugin-pug#readme",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "debug": "^4.3.4",
+    "pug": "^3.0.2"
+  }
+}

@@ -1,0 +1,3 @@
+export default {
+	HEADING_TEXT: 'THIS IS THE HEADING TEXT'
+}

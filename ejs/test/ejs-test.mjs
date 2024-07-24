@@ -60,7 +60,7 @@ name: Zach
 });
 
 describe("EJS Includes", () => {
-	test("EJS Render Absolute Include, Fxn no Data", async function () {
+	test("Render Absolute Include, Fxn no Data", async function () {
 		let [result] = await getTestResults((eleventyConfig) => {
 			eleventyConfig.addTemplate("filename.ejs", "<p><%- include('/included') %></p>", {
 				name: "Zach",
@@ -70,7 +70,7 @@ describe("EJS Includes", () => {
 		strictEqual(result.content, `<p>This is an include.</p>`);
 	});
 
-	test("EJS Render Absolute Include, Fxn with Data", async function () {
+	test("Render Absolute Include, Fxn with Data", async function () {
 		let [result] = await getTestResults((eleventyConfig) => {
 			// includes require a full filename passed in
 			eleventyConfig.addTemplate(
@@ -83,7 +83,7 @@ describe("EJS Includes", () => {
 		strictEqual(result.content, `<p>This is an Bill.</p>`);
 	});
 
-	test("EJS Render Relative Include (no leading dot-slash for current dir)", async function () {
+	test("Render Relative Include (no leading dot-slash for current dir)", async function () {
 		let [result] = await getTestResults((eleventyConfig) => {
 			// includes require a full filename passed in
 			eleventyConfig.addTemplate(
@@ -96,7 +96,7 @@ describe("EJS Includes", () => {
 		strictEqual(result.content, `<p>This is an include.</p>`);
 	});
 
-	test("EJS Render Relative Include Current dir to Subdir", async function () {
+	test("Render Relative Include Current dir to Subdir", async function () {
 		let [result] = await getTestResults((eleventyConfig) => {
 			// includes require a full filename passed in
 			eleventyConfig.addTemplate(
@@ -109,7 +109,7 @@ describe("EJS Includes", () => {
 		strictEqual(result.content, `<p>This is an include.</p>`);
 	});
 
-	test("EJS Render Relative Include Parent dir to Subdir", async function () {
+	test("Render Relative Include Parent dir to Subdir", async function () {
 		let [result] = await getTestResults((eleventyConfig) => {
 			// includes require a full filename passed in
 			eleventyConfig.addTemplate(
@@ -122,7 +122,7 @@ describe("EJS Includes", () => {
 		strictEqual(result.content, `<p>This is an include.</p>`);
 	});
 
-	test("EJS Render Relative Include Parent dir to Subdir", async function () {
+	test("Render Relative Include Parent dir to Subdir", async function () {
 		let [result] = await getTestResults((eleventyConfig) => {
 			// includes require a full filename passed in
 			eleventyConfig.addTemplate(
@@ -135,7 +135,7 @@ describe("EJS Includes", () => {
 		strictEqual(result.content, `<p>This is an include.</p>`);
 	});
 
-	test("EJS Render Relative Include, Fxn no Data", async function () {
+	test("Render Relative Include, Fxn no Data", async function () {
 		let [result] = await getTestResults((eleventyConfig) => {
 			// includes require a full filename passed in
 			eleventyConfig.addTemplate(
@@ -148,7 +148,7 @@ describe("EJS Includes", () => {
 		strictEqual(result.content, `<p>This is an include.</p>`);
 	});
 
-	test("EJS Render Relative Include current dir to subdir, Fxn no Data", async function () {
+	test("Render Relative Include current dir to subdir, Fxn no Data", async function () {
 		let [result] = await getTestResults((eleventyConfig) => {
 			// includes require a full filename passed in
 			eleventyConfig.addTemplate(
@@ -161,7 +161,7 @@ describe("EJS Includes", () => {
 		strictEqual(result.content, `<p>This is an include.</p>`);
 	});
 
-	test("EJS Render Relative Include, Fxn with Data", async function () {
+	test("Render Relative Include, Fxn with Data", async function () {
 		let [result] = await getTestResults((eleventyConfig) => {
 			// includes require a full filename passed in
 			eleventyConfig.addTemplate(

@@ -4,3 +4,4 @@
 - [`@11ty/eleventy-plugin-handlebars` in `handlebars/`](./handlebars/README.md)
 - [`@11ty/eleventy-plugin-mustache` in `mustache/`](./mustache/README.md)
 - [`@11ty/eleventy-plugin-haml` in `haml/`](./haml/README.md)
+- [`@11ty/eleventy-plugin-pug` in `pug/`](./pug/README.md)
