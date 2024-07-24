@@ -1,8 +1,7 @@
 {
   "name": "@11ty/eleventy-plugin-pug",
   "version": "0.0.2",
-  "description": "Pug templates for Eleventy 3!",
-  "private": true,
+  "description": "The `pug` template language plugin for Eleventy v3 and newer.",
   "keywords": [
     "eleventy",
     "eleventy-plugin",
@@ -23,19 +22,19 @@
 	},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Zearin/eleventy-plugin-pug.git"
+    "url": "git+https://github.com/11ty/eleventy-plugin-template-languages.git"
   },
   "author": "Zearin",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Zearin/eleventy-plugin-pug/issues"
+    "url": "https://github.com/11ty/eleventy-plugin-template-languages/issues"
   },
-  "homepage": "https://github.com/Zearin/eleventy-plugin-pug#readme",
+  "homepage": "https://github.com/11ty/eleventy-plugin-template-languages#readme",
   "engines": {
     "node": ">=18"
   },
   "dependencies": {
-    "debug": "^4.3.4",
-    "pug": "^3.0.2"
+    "debug": "^4.3.5",
+    "pug": "^3.0.3"
   }
 }
