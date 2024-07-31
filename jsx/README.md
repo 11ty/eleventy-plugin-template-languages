@@ -4,7 +4,7 @@ Adds support for JSX template files in Eleventy v3.0 and newer.
 
 - 11ty Docs https://www.11ty.dev/docs/languages/jsx/
 - `tsx` package: https://tsx.is
-- `react-dom` package: https://github.com/jeasx/jsx-async-runtime
+- `react-dom` package: https://www.npmjs.com/package/react-dom
 
 ## Installation
 
