@@ -44,7 +44,7 @@ export function render({ name, content }) {
 ```
 
 This 11ty template gets `name` and `content` from the passed-in `data` object. Since `content` is a string of HTML, you pass it through the
-`dangerouslySetInnerHTML` to get it into the result. If that string comes from an untrusted source, you might want to "purify" it (to prevent XSS.)
+`dangerouslySetInnerHTML` to get it into the result.
 
 Why the `import` on the first line? It's needed to tell the toolchain where to get the functions that do the node processing behind-the-scenes. `esbuild` has ways of setting this, but `tsx` only supports this for TypeScript in `tsconfig.json`. If `tsx` would support the correct [`esbuild` flag](https://esbuild.github.io/content-types/#auto-import-for-jsx), we could skip this line when not using TypeScript.
 
