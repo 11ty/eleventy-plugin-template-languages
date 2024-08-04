@@ -40,5 +40,3 @@ export function render({ name, content }) {
 	);
 }
 ```
-
-This 11ty template gets `name` and `content` from the passed-in `data` object. If the `content` string comes from an untrusted source, you might want to "purify" it (to prevent XSS.)
