@@ -1,6 +1,8 @@
 const haml = require("hamljs");
 
 module.exports = function (eleventyConfig, options = {}) {
+	eleventyConfig.versionCheck(">=3.0.0-alpha.1");
+
 	options = Object.assign(
 		{
 			// Override the instance

@@ -7,7 +7,7 @@ import EleventyPugExtension from './extension.js'
 
 
 /**
- *	@typedef {import('@11ty/eleventy/src/UserConfig.js').UserConfig} UserConfig
+ *	@typedef {import('@11ty/eleventy').UserConfig} UserConfig
  */
 
 //	TODO: 	Group Pug-only options under `pugOptions`, and
@@ -20,6 +20,7 @@ import EleventyPugExtension from './extension.js'
  *	@param {Object} [options = {}]
  */
 export default function EleventyPluginPug(eleventyConfig, options = {}) {
+	eleventyConfig.versionCheck(">=3.0.0-alpha.1");
 
 	// Tell Eleventy to process `*.pug` files
 	eleventyConfig.addTemplateFormats('pug')

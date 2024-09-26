@@ -38,15 +38,15 @@ async function getPartials(directories, extensions) {
 			});
 
 			return fs.promises
-				.readFile(partialFile, {
-					encoding: "utf8",
-				})
-				.then((content) => {
-					return {
-						content,
-						path: partialPathNoExt,
-					};
-				});
+			.readFile(partialFile, {
+				encoding: "utf8",
+			})
+			.then((content) => {
+				return {
+					content,
+					path: partialPathNoExt,
+				};
+			});
 		})
 	);
 
@@ -67,6 +67,8 @@ async function getPartials(directories, extensions) {
 }
 
 module.exports = function (eleventyConfig, options = {}) {
+	eleventyConfig.versionCheck(">=3.0.0-alpha.1");
+
 	options = Object.assign(
 		{
 			// Override the instance
@@ -86,7 +88,7 @@ module.exports = function (eleventyConfig, options = {}) {
 	let partials = {};
 	eleventyConfig.on("eleventy.resourceModified", async modifiedPath => {
 		if(files.includes(modifiedPath)) {
-			ret = await getPartials(eleventyConfig.directories, ["mustache"]);
+			let ret = await getPartials(eleventyConfig.directories, ["mustache"]);
 			files = ret.files;
 			partials = ret.partials;
 		}

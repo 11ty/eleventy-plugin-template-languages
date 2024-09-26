@@ -9,7 +9,6 @@ import {
 //	test subjects
 import plugin from '../index.js'
 import Eleventy from '@11ty/eleventy'
-import UserConfig from '@11ty/eleventy/src/UserConfig.js'
 
 //	Other plugins I’ve looked at test their own code,
 //	but they don’t test how it interacts with Eleventy.
@@ -20,17 +19,25 @@ import UserConfig from '@11ty/eleventy/src/UserConfig.js'
 
 describe('Pug: Minimal possible setup', function() {
 
-	context('GIVEN a UserConfig', function() {
-		const config = new UserConfig()
+	context('GIVEN a config callback', async function() {
+		const GLOBAL_DATA_PROJECT_PATH 	= './pug/test-stubs/minimal'
+		const input						= path.join(GLOBAL_DATA_PROJECT_PATH, '_src')
+		const output					= path.join(GLOBAL_DATA_PROJECT_PATH, '_site')
 
-		it('it starts with no plugins', function() {
-			equal(config.plugins.length, 0)
+		let eleventyInstance = new Eleventy(input, output, {
+			config: function(eleventyConfig) {
+				it('it starts with no plugins', function() {
+					equal(eleventyConfig.plugins.length, 0)
+				})
+
+				it('runs .addPlugin() successfully', function() {
+					eleventyConfig.addPlugin(plugin)
+					equal(eleventyConfig.plugins.length, 1)
+				})
+			}
 		})
 
-		it('runs .addPlugin() successfully', function() {
-			config.addPlugin(plugin)
-			equal(config.plugins.length, 1)
-		})
+		await eleventyInstance.init();
 	})
 
 	context('GIVEN a minimal project and config', function() {

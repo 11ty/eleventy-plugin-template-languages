@@ -1,6 +1,8 @@
 const ejs = require("ejs");
 
 module.exports = function (eleventyConfig, options = {}) {
+	eleventyConfig.versionCheck(">=3.0.0-alpha.1");
+
 	options = Object.assign(
 		{
 			// Makes more sense as `input`, but backwards compat here
