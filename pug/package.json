@@ -1,45 +1,48 @@
 {
-  "name": "@11ty/eleventy-plugin-pug",
-  "version": "1.0.0-alpha.1",
-  "description": "The `pug` template language plugin for Eleventy v3 and newer.",
-  "keywords": [
-    "eleventy",
-    "eleventy-plugin",
-    "plugin",
-    "pug",
-    "html",
-    "template",
-    "ssg",
-    "static-site-generator"
-  ],
-  "exports": "./index.js",
+	"name": "@11ty/eleventy-plugin-pug",
+	"version": "1.0.0",
+	"description": "The `pug` template language plugin for Eleventy v3 and newer.",
+	"keywords": [
+		"eleventy",
+		"eleventy-plugin",
+		"plugin",
+		"pug",
+		"html",
+		"template",
+		"ssg",
+		"static-site-generator"
+	],
+	"exports": "./index.js",
+	"publishConfig": {
+		"access": "public"
+	},
 	"files": [
 		"*.js",
 		"!test",
 		"!test-stubs"
 	],
-  "type": "module",
-  "directories": {
-    "test": "test"
-  },
+	"type": "module",
+	"directories": {
+		"test": "test"
+	},
 	"scripts": {
 		"test": "echo \"Error: run tests from root directory\" && exit 1"
 	},
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/11ty/eleventy-plugin-template-languages.git"
-  },
-  "author": "Zearin",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/11ty/eleventy-plugin-template-languages/issues"
-  },
-  "homepage": "https://github.com/11ty/eleventy-plugin-template-languages#readme",
-  "engines": {
-    "node": ">=18"
-  },
-  "dependencies": {
-    "debug": "^4.3.5",
-    "pug": "^3.0.3"
-  }
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/11ty/eleventy-plugin-template-languages.git"
+	},
+	"author": "Zearin",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/11ty/eleventy-plugin-template-languages/issues"
+	},
+	"homepage": "https://github.com/11ty/eleventy-plugin-template-languages#readme",
+	"engines": {
+		"node": ">=18"
+	},
+	"dependencies": {
+		"debug": "^4.3.5",
+		"pug": "^3.0.3"
+	}
 }
