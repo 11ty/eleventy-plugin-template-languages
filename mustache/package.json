@@ -1,6 +1,6 @@
 {
 	"name": "@11ty/eleventy-plugin-mustache",
-	"version": "1.0.0-alpha.1",
+	"version": "1.0.0",
 	"description": "The `mustache` template language plugin for Eleventy v3 and newer.",
 	"main": "mustacheConfig.js",
 	"type": "commonjs",
