@@ -1,15 +1,16 @@
 import { strictEqual } from "node:assert";
-import { test, describe } from "node:test";
+import { test } from "node:test";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import haml from "hamljs";
 import Eleventy from "@11ty/eleventy";
+import { TemplatePath } from "@11ty/eleventy-utils";
 
 import HamlPlugin from "../hamlConfig.js";
 
 const dirname = path.dirname(import.meta.url);
-const input = fileURLToPath(path.join(dirname, "stubs"));
+const input = TemplatePath.relativePath(fileURLToPath(path.join(dirname, "stubs")));
 
 async function getTestResults(configCallback, options = {}) {
 	let elev = new Eleventy(input, undefined, {
