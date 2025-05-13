@@ -5,12 +5,11 @@ import { fileURLToPath } from "node:url";
 
 import ejs from "ejs";
 import Eleventy from "@11ty/eleventy";
-import { TemplatePath } from "@11ty/eleventy-utils";
 
 import EjsPlugin from "../ejsConfig.js";
 
 const dirname = path.dirname(import.meta.url);
-const input = TemplatePath.relativePath(fileURLToPath(path.join(dirname, "stubs")));
+const input = path.relative(".", fileURLToPath(path.join(dirname, "stubs")));
 
 async function getTestResults(configCallback, options = {}) {
 	let elev = new Eleventy(input, undefined, {
