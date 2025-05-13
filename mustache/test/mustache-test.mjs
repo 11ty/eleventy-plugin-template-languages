@@ -5,11 +5,12 @@ import { fileURLToPath } from "node:url";
 
 import mustache from "mustache";
 import Eleventy from "@11ty/eleventy";
+import { TemplatePath } from "@11ty/eleventy-utils";
 
 import MustachePlugin from "../mustacheConfig.js";
 
 const dirname = path.dirname(import.meta.url);
-const input = path.relative(".", fileURLToPath(path.join(dirname, "stubs")));
+const input = TemplatePath.normalize(path.relative(".", fileURLToPath(path.join(dirname, "stubs"))));
 
 async function getTestResults(configCallback, options = {}) {
 	let elev = new Eleventy(input, undefined, {

@@ -5,11 +5,12 @@ import { fileURLToPath } from "node:url";
 
 import handlebars from "handlebars";
 import Eleventy from "@11ty/eleventy";
+import { TemplatePath } from "@11ty/eleventy-utils";
 
 import HandlebarsPlugin from "../handlebarsConfig.js";
 
 const dirname = path.dirname(import.meta.url);
-const input = path.relative(".", fileURLToPath(path.join(dirname, "stubs")));
+const input = TemplatePath.normalize(path.relative(".", fileURLToPath(path.join(dirname, "stubs"))));
 
 async function getTestResults(configCallback, options = {}) {
 	let elev = new Eleventy(input, undefined, {
