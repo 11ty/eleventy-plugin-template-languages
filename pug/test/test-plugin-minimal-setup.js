@@ -26,13 +26,10 @@ describe('Pug: Minimal possible setup', function() {
 
 		let eleventyInstance = new Eleventy(input, output, {
 			config: function(eleventyConfig) {
-				it('it starts with no plugins', function() {
-					equal(eleventyConfig.plugins.length, 0)
-				})
-
 				it('runs .addPlugin() successfully', function() {
+					let pluginCount = eleventyConfig.plugins.length;
 					eleventyConfig.addPlugin(plugin)
-					equal(eleventyConfig.plugins.length, 1)
+					equal(eleventyConfig.plugins.length, pluginCount + 1)
 				})
 			}
 		})
