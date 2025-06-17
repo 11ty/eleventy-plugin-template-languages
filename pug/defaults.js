@@ -13,9 +13,10 @@ export const DEFAULT_PUG_OPTIONS = {
 
 	/**
 	 *	The root directory of all absolute inclusion.
-	 *	@type {String}
+	 *	@type {String|undefined}
+	 *	@default undefined
 	 */
-	basedir: '.',
+	basedir: undefined,
 
 	/**
 	 *	If the doctype is not specified as part of the template, you can specify it here.
