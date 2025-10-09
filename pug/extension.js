@@ -47,33 +47,28 @@ const extension = {
 		// debug('compile resolved inputPath to filename: %s', filename)
 
 		// Used to record dependencies after the fact.
-		const self = this
+		const renderOptions = {
+			basedir: this.config.directories.input,
+			filename: inputPath,
+			filters: extension.options.filters,
+		}
+
+		// We don’t set `cache: true` in the Pug options since we want to
+		// invalidate the cache ourselves on every build (see `init`
+		// above). Note that `inputPath` is not enough as the plugin may
+		// render multiple parts of the same template, such as the
+		// permalink and the main content.
+		const key = getCacheKey(renderOptions, inputSource)
+		debugDev("Render key: %O", key)
+		const compiled = (cache[key] ??= pug.compile(inputSource, renderOptions))
+		this.addDependencies(inputPath, compiled.dependencies)
+		debugDev("Dependencies of %s: %s", inputPath, compiled.dependencies)
 
 		/** @param {Object} arg - Provided by Eleventy at runtime	*/
 		return async function(arg) {
 			debug(	 'about to render... inputPath: %O',	inputPath)
 
-			// If we could get the `includes` in the outer function, we
-			// could call `compile` there and enable caching on the Eleventy
-			// side. We don’t set `cache: true` in the Pug options since we
-			// want to invalidate the cache ourselves on every build (see
-			// `init` above).
-			const renderOptions = {
-				basedir: arg.eleventy.directories.includes,
-				filename: inputPath,
-				filters: extension.options.filters,
-			}
-
-			// `inputPath` is not enough as the plugin may render multiple
-			// parts of the same template, such as the permalink and the
-			// main content.
-			const key = getCacheKey(renderOptions, inputSource)
-			debugDev("Render key: %O", key)
-			const compiled = (cache[key] ??= pug.compile(inputSource, renderOptions))
-
 			const output = compiled(arg)
-			// See above about `includes`.
-			self.addDependencies(inputPath, output.dependencies)
 			return output
 		}
 	},
