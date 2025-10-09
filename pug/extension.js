@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto'
+
 import debugUtil from 'debug'
 import pug	from 'pug'
 
@@ -8,6 +10,12 @@ const debug 	= debugUtil('Eleventy:Plugins:Pug')
 const debugDev 	= debugUtil('Dev:Eleventy:Plugins:Pug')
 
 let cache = {}
+
+function getCacheKey(renderOptions, inputSource) {
+	const hash = createHash('md5')
+	hash.update(JSON.stringify({ renderOptions, inputSource }))
+	return hash.digest('hex')
+}
 
 const extension = {
 	outputFileExtension: 'html',
@@ -59,7 +67,7 @@ const extension = {
 			// `inputPath` is not enough as the plugin may render multiple
 			// parts of the same template, such as the permalink and the
 			// main content.
-			const key = JSON.stringify({ renderOptions, inputSource })
+			const key = getCacheKey(renderOptions, inputSource)
 			debugDev("Render key: %O", key)
 			const compiled = (cache[key] ??= pug.compile(inputSource, renderOptions))
 
