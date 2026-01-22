@@ -27,7 +27,10 @@ export default function EleventyPluginPug(eleventyConfig, options = {}) {
 
 	// Prepare extension object
 	const PugExtension = EleventyPugExtension
-	PugExtension.options = Object.assign(PugExtension.options, options)
+	PugExtension.options = Object.assign(
+		PugExtension.options, 
+		{ filters: eleventyConfig.getFilters() },
+		options)
 
 	// PugExtension.options.basedir =
 	// 	options?.basedir
