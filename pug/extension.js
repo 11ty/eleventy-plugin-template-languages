@@ -44,18 +44,15 @@ const extension = {
 			debugDev('rendering... received arg: %O',		arg)
 			debug(	 'about to render... inputPath: %O', 	inputPath)
 
-			//	TODO: clean up the setup and updating of options
-			const renderOptions = Object.assign(
-				{},
-				{
-					basedir: arg.eleventy.directories.includes,
-					filename: inputPath,
-					filters: extension.options.filters,
-				},
-				arg
-			)
-
-			// console.log('\n\nrenderOptions: %O\n\n', renderOptions)
+		const renderOptions = Object.assign(
+			{},
+			extension.options,
+			{
+				basedir: arg.eleventy.directories.includes,
+				filename: inputPath,
+			},
+			arg
+		)
 
 			/*
 			 *	Using `pug.render()` is the simplest path to get this plugin working.
