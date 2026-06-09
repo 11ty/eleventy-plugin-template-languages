@@ -54,3 +54,18 @@ test("HAML permalink (should be raw text)", async function () {
 
 	strictEqual(result.url, `/this-is-a-url/`);
 });
+
+test('Haml built-in filter', async function () {
+	const template = `
+:cdata
+  foo`;
+
+	let [result] = await getTestResults((eleventyConfig) => {
+		eleventyConfig.addTemplate("sample.haml", template, {});
+	});
+
+	const expectedContent = `<![CDATA[
+foo
+]]>`;
+	strictEqual(result.content.trim(), expectedContent);
+});
