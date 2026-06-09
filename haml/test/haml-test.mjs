@@ -56,6 +56,7 @@ test("HAML permalink (should be raw text)", async function () {
 });
 
 test('Haml built-in filter', async function () {
+	// Haml needs spaces for indents; tabs are a syntax error.
 	const template = `
 :cdata
   foo`;
@@ -68,4 +69,18 @@ test('Haml built-in filter', async function () {
 foo
 ]]>`;
 	strictEqual(result.content.trim(), expectedContent);
+});
+
+test('Eleventy built-in universal filter', async function () {
+	// Haml needs spaces for indents; tabs are a syntax error.
+	const template =`
+:slugify
+  My String
+`;
+
+	let [result] = await getTestResults((eleventyConfig) => {
+		eleventyConfig.addTemplate("sample.haml", template, {foo: 'bar'});
+	});
+
+	strictEqual(result.content.trim(), 'my-string');
 });

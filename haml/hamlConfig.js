@@ -13,13 +13,21 @@ module.exports = function (eleventyConfig, options = {}) {
 
 	// Remove eleventy specific things from `options`
 	let libraryOverride = options.eleventyLibraryOverride;
-	delete options.eleventyLibraryOverride;
+	delete options.eleventyLibraryOverride
+
+	const library = libraryOverride || haml;
+
+	for(let [name, callback] of Object.entries(eleventyConfig.getFilters())) {
+		library.filters[name] = function (string, buffer) {
+			return buffer.push(callback(string));
+		}
+	}
 
 	eleventyConfig.addTemplateFormats("haml");
 
 	eleventyConfig.addExtension("haml", {
 		compile: (str, inputPath) => {
-			return (libraryOverride || haml).compile(str);
+			return library.compile(str);
 		},
 	});
 };
