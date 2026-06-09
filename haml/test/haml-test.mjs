@@ -84,3 +84,21 @@ test('Eleventy built-in universal filter', async function () {
 
 	strictEqual(result.content.trim(), 'my-string');
 });
+
+test('User-defined universal filter', async function () {
+	const myFilter = (string) => `FILTERED[${string}]`
+	const string = 'a string variable'
+
+	// Haml needs spaces for indents; tabs are a syntax error.
+	const template =`
+:my_filter
+  ${string}
+`;
+
+	let [result] = await getTestResults((eleventyConfig) => {
+		eleventyConfig.addFilter('my_filter', myFilter);
+		eleventyConfig.addTemplate("sample.haml", template, {foo: 'bar'});
+	});
+
+	strictEqual(result.content.trim(), myFilter(string));
+});
