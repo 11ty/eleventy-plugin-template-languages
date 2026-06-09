@@ -13,7 +13,7 @@ module.exports = function (eleventyConfig, options = {}) {
 
 	// Remove eleventy specific things from `options`
 	let libraryOverride = options.eleventyLibraryOverride;
-	delete options.eleventyLibraryOverride
+	delete options.eleventyLibraryOverride;
 
 	const library = libraryOverride || haml;
 
