@@ -169,19 +169,19 @@ export default class VueCompiler {
     this.ignores = new Set();
 
     // These need to be forced to forward slashes for comparison
-    let relativeIncludesDir = this.rawIncludesDir ? VueCompiler.forceForwardSlashOnFilePath(addLeadingDotSlash(path.join(this.relativeInputDir, this.rawIncludesDir))) : undefined;
-    let relativeLayoutsDir = this.rawLayoutsDir ? VueCompiler.forceForwardSlashOnFilePath(addLeadingDotSlash(path.join(this.relativeInputDir, this.rawLayoutsDir))) : undefined;
+    this.relativeIncludesDir = this.rawIncludesDir ? VueCompiler.forceForwardSlashOnFilePath(addLeadingDotSlash(path.join(this.relativeInputDir, this.rawIncludesDir))) : undefined;
+    this.relativeLayoutsDir = this.rawLayoutsDir ? VueCompiler.forceForwardSlashOnFilePath(addLeadingDotSlash(path.join(this.relativeInputDir, this.rawLayoutsDir))) : undefined;
 
     // don’t add ignores that match includes or layouts dirs
     for(let ignore of extraIgnores) {
-      if(relativeIncludesDir && ignore.startsWith(relativeIncludesDir)) {
+      if(this.relativeIncludesDir && ignore.startsWith(this.relativeIncludesDir)) {
         // do nothing
         debug( "Skipping ignore from eleventy.ignores event: %o, matched includes dir", ignore);
-      } else if(relativeLayoutsDir && ignore.startsWith(relativeLayoutsDir)) {
+      } else if(this.relativeLayoutsDir && ignore.startsWith(this.relativeLayoutsDir)) {
         // do nothing
         debug( "Skipping ignore from eleventy.ignores event: %o, matched layouts dir", ignore);
       } else {
-        debug( "Adding ignore from eleventy.ignores event: %o %O %O", ignore, { relativeIncludesDir }, { relativeLayoutsDir } );
+        debug( "Adding ignore from eleventy.ignores event: %o %O %O", ignore, { relativeIncludesDir: this.relativeIncludesDir }, { relativeLayoutsDir: this.relativeLayoutsDir } );
         this.ignores.add(ignore);
       }
     }
