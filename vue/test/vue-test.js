@@ -388,3 +388,26 @@ test("Dynamically imported component (plugin-template-languages#49)", async () =
 	let component = ev.getComponent("./vue/test/stubs-dynamic-import/index.vue");
 	assert.equal(await ev.renderComponent(component, {}), `<div><p>Dynamic child</p></div>`);
 });
+
+test("Rebuilt components replace their stale import relationships", () => {
+	let ev = new VueCompiler();
+	ev.componentRelationships = [{ from: "page.js", to: "child.js" }, { from: "other.js", to: "child.js" }];
+	ev.createVueComponents([{ facadeModuleId: path.join(process.cwd(), "page.vue"), fileName: "page.js", imports: [] }]);
+	assert.deepEqual(ev.componentRelationships, [{ from: "other.js", to: "child.js" }]);
+});
+
+test("Non-.vue modules are not counted as components", () => {
+	let ev = new VueCompiler();
+	ev.createVueComponents([
+		{ facadeModuleId: path.join(process.cwd(), "page.vue"), fileName: "page.js", imports: ["helpers.js"] },
+		{ facadeModuleId: path.join(process.cwd(), "helpers.js"), fileName: "helpers.js", imports: [] },
+	]);
+	assert.equal(ev.componentsWriteCount, 1);
+	assert.equal(ev.getLocalVueFilePath(path.join(process.cwd(), "helpers.js")), `.${path.sep}helpers.js`);
+	assert.deepEqual(Object.keys(ev.vueFileToJavaScriptFilenameMap), [`.${path.sep}page.vue`]);
+});
+
+test("Absolute cache directory", () => {
+	let ev = new VueCompiler(path.resolve("vue/.cache/absolute"));
+	assert.equal(ev.getFullCacheDir(), path.resolve("vue/.cache/absolute"));
+});

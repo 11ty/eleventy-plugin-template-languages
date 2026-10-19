@@ -93,8 +93,14 @@ export default function(eleventyConfig, configGlobalOptions = {}) {
     // `changedFiles` array argument is available on Eleventy 0.11.1+
     changedVueFilesOnWatch = (changedFiles || []).filter(file => file.endsWith(".vue"));
 
-    // Only reset what changed! (Partial builds for Vue rollup files)
-    if(changedVueFilesOnWatch.length > 0) {
+    // A changed non-.vue module imported by a component (e.g. `.js` or `.css`) needs a full rebuild
+    let hasChangedDependency = (changedFiles || []).some(file => !file.endsWith(".vue") && vueCompiler.watchFiles.has(path.resolve(file)));
+
+    if(hasChangedDependency) {
+      changedVueFilesOnWatch = [];
+      skipVueBuild = false;
+    } else if(changedVueFilesOnWatch.length > 0) {
+      // Only reset what changed! (Partial builds for Vue rollup files)
       skipVueBuild = false;
     } else {
       if(hasChangedFiles) {

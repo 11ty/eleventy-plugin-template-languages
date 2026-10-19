@@ -16,7 +16,8 @@
 		"access": "public"
 	},
 	"files": [
-		"!test"
+		"vueConfig.js",
+		"VueCompiler.js"
 	],
 	"funding": {
 		"type": "opencollective",

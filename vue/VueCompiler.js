@@ -91,13 +91,16 @@ export default class VueCompiler {
     return filePath.split(path.sep).join("/");
   }
 
-  constructor(cacheDirectory) {
+  constructor(cacheDirectory = ".cache/vue/") {
     this.workingDir = path.resolve(".");
     this.ignores = new Set();
 
     this.vueFileToCSSMap = {};
     this.vueFileToJavaScriptFilenameMap = {};
     this.componentRelationships = [];
+    this.cssTreeCache = new Map();
+    // Absolute paths of every module rollup has bundled
+    this.watchFiles = new Set();
 
     this.rollupBundleOptions = {
       format: "cjs", // because we’re consuming these in node. See also "esm"
@@ -121,33 +124,6 @@ export default class VueCompiler {
 
   setReadOnly(readOnly) {
     this.readOnly = !!readOnly;
-  }
-
-  getEntryFileName(localpath) {
-    if(localpath.endsWith(".vue")) {
-      localpath = localpath.substr(0, localpath.length - 4) + ".js";
-    }
-    if(localpath.startsWith(this.workingDir)) {
-      localpath = localpath.substr(this.workingDir.length);
-    }
-    let split = localpath.split(path.sep);
-    if(!split[0]) {
-      split.shift();
-    }
-    return split.join("__");
-  }
-
-  reset() {
-    this.vueFileToCSSMap = {};
-    this.componentRelationships = [];
-  }
-
-  // Deprecated, use resetCSSFor above
-  resetFor(localVuePath) {
-    localVuePath = VueCompiler.normalizeOperatingSystemFilePath(localVuePath);
-
-    debug("Clearing CSS styleNodes in Vue for %o", localVuePath);
-    this.vueFileToCSSMap[localVuePath] = [];
   }
 
   setRollupOptions(options) {
@@ -260,7 +236,7 @@ export default class VueCompiler {
   // adds leading ./
   _createRequirePath(...paths) {
     let joined = path.join(...paths);
-    if(joined.startsWith(path.sep)) {
+    if(path.isAbsolute(joined)) {
       return joined;
     }
     return `.${path.sep}${joined}`;
@@ -275,7 +251,7 @@ export default class VueCompiler {
   }
 
   getFullCacheDir() {
-    if(this.cacheDir.startsWith("/")) {
+    if(path.isAbsolute(this.cacheDir)) {
       return this.cacheDir;
     }
     return path.join(this.workingDir, this.cacheDir);
@@ -353,6 +329,9 @@ export default class VueCompiler {
     debug("Found these input files: %O", input);
     let options = this.getMergedRollupOptions(input, isSubsetOfFiles);
     let bundle = await rollup(options);
+    for(let file of bundle.watchFiles) {
+      this.watchFiles.add(file);
+    }
 
     return bundle;
   }
@@ -423,11 +402,18 @@ export default class VueCompiler {
     let { vueToJs, relationships } = JSON.parse(await fsp.readFile(this.bypassRollupCacheFile, "utf8"));
     this.vueFileToJavaScriptFilenameMap = vueToJs;
     this.componentRelationships = relationships;
+    this.cssTreeCache.clear();
   }
 
   // output is returned from .write() or .generate()
   createVueComponents(output) {
     this.componentsWriteCount = 0;
+    this.cssTreeCache.clear();
+
+    // Rebuilt modules replace their previous import edges
+    let rebuilt = new Set(output.map(entry => entry.fileName));
+    this.componentRelationships = this.componentRelationships.filter(({ from }) => !rebuilt.has(from));
+
     for(let entry of output) {
       let fullVuePath = entry.facadeModuleId;
       let inputPath = this.getLocalVueFilePath(fullVuePath);
@@ -435,7 +421,8 @@ export default class VueCompiler {
       let intermediateComponent = false;
       let css;
 
-      if(fullVuePath.endsWith("&lang.js")) {
+      // Includes `?vue&type=…&lang.js` blocks, plain JavaScript modules, and virtual helpers
+      if(!fullVuePath.endsWith(".vue")) {
         intermediateComponent = true;
         css = false;
       } else {
@@ -464,12 +451,14 @@ export default class VueCompiler {
       filePath = `.${fullPath.substr(this.workingDir.length)}`;
     }
     let extension = ".vue";
-    let localVuePath = filePath.substr(0, filePath.lastIndexOf(extension) + extension.length);
+    let index = filePath.lastIndexOf(extension);
+    let localVuePath = index > -1 ? filePath.slice(0, index + extension.length) : filePath;
     return VueCompiler.normalizeOperatingSystemFilePath(localVuePath);
   }
 
   /* CSS */
   resetCSSFor(styleNodes) {
+    this.cssTreeCache.clear();
     for(let fullVuePath in styleNodes) {
       let localVuePath = this.getLocalVueFilePath(fullVuePath);
       delete this.vueFileToCSSMap[localVuePath];
@@ -489,6 +478,7 @@ export default class VueCompiler {
 
   addCSSViaLocalPath(localVuePath, cssText) {
     localVuePath = VueCompiler.normalizeOperatingSystemFilePath(localVuePath);
+    this.cssTreeCache.clear();
 
     if(!this.vueFileToCSSMap[localVuePath]) {
       this.vueFileToCSSMap[localVuePath] = [];
@@ -514,6 +504,9 @@ export default class VueCompiler {
     let entryFilename = this.getJavaScriptComponentFile(localVuePath);
     if(!entryFilename) {
       return [];
+    }
+    if(this.cssTreeCache.has(entryFilename)) {
+      return this.cssTreeCache.get(entryFilename);
     }
 
     let imports = {};
@@ -544,12 +537,14 @@ export default class VueCompiler {
     };
     walk(entryFilename);
 
+    this.cssTreeCache.set(entryFilename, styles);
     return styles;
   }
 
   /* Map from vue files to compiled JavaScript files */
   addVueToJavaScriptMapping(localVuePath, jsFilename) {
     localVuePath = VueCompiler.normalizeOperatingSystemFilePath(localVuePath);
+    this.cssTreeCache.clear();
 
     this.vueFileToJavaScriptFilenameMap[localVuePath] = jsFilename;
   }
