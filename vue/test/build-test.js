@@ -1,5 +1,6 @@
 import { strictEqual, deepStrictEqual, ok, rejects } from "node:assert";
 import { test } from "node:test";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -120,4 +121,26 @@ test("Vue as a layout file (plugin-template-languages#39)", async function () {
 			content: `<!doctype html><title>Vue page</title><style>main { color: rebeccapurple;\n}</style><main data-title="Vue page"><p>Vue page content</p></main>\n`,
 		},
 	]);
+});
+
+test("Unchanged components skip rollup on the next build (plugin-template-languages#40)", async function () {
+	let cacheDirectory = path.relative(".", path.join(dirname, "../.cache/build-test-incremental/"));
+	await fs.promises.rm(cacheDirectory, { recursive: true, force: true });
+
+	async function build() {
+		let elev = new Eleventy(input, undefined, {
+			config: (eleventyConfig) => {
+				eleventyConfig.addPlugin(VuePlugin, { cacheDirectory });
+			},
+		});
+		let [result] = await elev.toJSON();
+		return result.content;
+	}
+
+	let compiledFile = path.join(cacheDirectory, "data.js");
+	let first = await build();
+	let { mtimeMs } = await fs.promises.stat(compiledFile);
+
+	strictEqual(await build(), first);
+	strictEqual((await fs.promises.stat(compiledFile)).mtimeMs, mtimeMs);
 });

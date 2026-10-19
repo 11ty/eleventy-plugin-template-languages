@@ -158,6 +158,12 @@ export default function(eleventyConfig, configGlobalOptions = {}) {
           return;
         }
 
+        // Skip rollup when no source files, options, or versions changed since the last full build
+        if(!options.readOnly && !isSubset && await vueCompiler.isRollupOutputCacheValid(files)) {
+          await vueCompiler.loadRollupOutputCache();
+          return;
+        }
+
         try {
           let bundle = await vueCompiler.getBundle(files, isSubset);
           let output = await vueCompiler.write(bundle);
@@ -172,7 +178,7 @@ export default function(eleventyConfig, configGlobalOptions = {}) {
           throw e;
         }
 
-        if(!options.readOnly && !isSubset) { // implied vueCompiler.hasRollupOutputCache() was false
+        if(!options.readOnly && !isSubset) {
           await vueCompiler.writeRollupOutputCache();
         }
       }

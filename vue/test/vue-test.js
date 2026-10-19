@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert";
+import fs from "node:fs";
 import path from "node:path";
 import postcssNested from "postcss-nested";
 
@@ -383,4 +384,53 @@ test("Non-.vue modules are not counted as components", () => {
 test("Absolute cache directory", () => {
 	let ev = new VueCompiler(path.resolve("vue/.cache/absolute"));
 	assert.equal(ev.getFullCacheDir(), path.resolve("vue/.cache/absolute"));
+});
+
+test("Rollup output cache is validated against source files and options (plugin-template-languages#40)", async () => {
+	let src = "vue/.cache/cache-test-src";
+	await fs.promises.rm(src, { recursive: true, force: true });
+	await fs.promises.mkdir(path.join(src, "_includes"), { recursive: true });
+	await fs.promises.writeFile(path.join(src, "index.vue"), `<template><child /></template><script>import Child from "./_includes/child.vue"; export default { components: { Child } };</script>`);
+	await fs.promises.writeFile(path.join(src, "_includes/child.vue"), `<template><p>{{ label }}</p></template><script>import { label } from "./label.js"; export default { data: () => ({ label }) };</script><style>p { color: red; }</style>`);
+	await fs.promises.writeFile(path.join(src, "_includes/label.js"), `export const label = "Hi";`);
+
+	function getCompiler() {
+		let ev = new VueCompiler();
+		ev.setCacheDir("vue/.cache/cache-test");
+		ev.setInputDir(src);
+		ev.setIncludesDir("_includes");
+		ev.setRollupOptions({});
+		ev.setRollupPluginVueOptions({});
+		return ev;
+	}
+
+	let ev = getCompiler();
+	let files = await ev.findFiles();
+	ev.createVueComponents(await ev.write(await ev.getBundle(files)));
+	await ev.writeRollupOutputCache();
+
+	let cached = getCompiler();
+	assert.equal(await cached.isRollupOutputCacheValid(files), true);
+	await cached.loadRollupOutputCache();
+	assert.equal(await cached.renderComponent(cached.getComponent(`./${src}/index.vue`), {}), "<p>Hi</p>");
+	assert.deepEqual(cached.getCSSForComponentTree(`./${src}/index.vue`), ev.getCSSForComponentTree(`./${src}/index.vue`));
+	assert.ok(cached.watchFiles.has(path.resolve(src, "_includes/label.js")));
+
+	// options
+	let otherOptions = getCompiler();
+	otherOptions.setRollupPluginVueOptions({ exposeFilename: false });
+	assert.equal(await otherOptions.isRollupOutputCacheValid(files), false);
+
+	// input files
+	assert.equal(await getCompiler().isRollupOutputCacheValid(files.slice(1)), false);
+
+	// imported JavaScript dependency
+	await fs.promises.writeFile(path.join(src, "_includes/label.js"), `export const label = "Bye";`);
+	assert.equal(await getCompiler().isRollupOutputCacheValid(files), false);
+	await fs.promises.writeFile(path.join(src, "_includes/label.js"), `export const label = "Hi";`);
+	assert.equal(await getCompiler().isRollupOutputCacheValid(files), true);
+
+	// component
+	await fs.promises.appendFile(path.join(src, "_includes/child.vue"), "\n");
+	assert.equal(await getCompiler().isRollupOutputCacheValid(files), false);
 });

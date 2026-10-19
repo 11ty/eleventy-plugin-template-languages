@@ -22,7 +22,7 @@ npm install @11ty/eleventy-plugin-vue
 
 ### Changelog
 
-* `2.0.0` Requires Eleventy v3 and Node.js 22. Renames the `EleventyVue` export to `VueCompiler`. Component CSS moves to Eleventy’s `css` bundle: the `assets` option, `getVueComponentCssForPage` filter, and `@11ty/eleventy-assets` dependency were removed. Documents `.vue` layout support.
+* `2.0.0` Requires Eleventy v3 and Node.js 22. Renames the `EleventyVue` export to `VueCompiler`. Component CSS moves to Eleventy’s `css` bundle: the `assets` option, `getVueComponentCssForPage` filter, and `@11ty/eleventy-assets` dependency were removed. Documents `.vue` layout support. Reuses compiled components across builds when nothing changed.
 * `1.0.0` ([Milestone](https://github.com/11ty/eleventy-plugin-vue/milestone/6?closed=1)) Works with Vue 3. Adds Windows support.
 * `0.6.x` ([Milestone](https://github.com/11ty/eleventy-plugin-vue/milestone/5?closed=1))
 * `0.3.1` ([Milestone](https://github.com/11ty/eleventy-plugin-vue/milestone/4?closed=1))
@@ -39,6 +39,7 @@ npm install @11ty/eleventy-plugin-vue
 * All JavaScript Template Functions (see https://www.11ty.dev/docs/languages/javascript/#javascript-template-functions), Universal Filters, Universal Shortcodes, Universal Paired Shortcodes are available as Vue `methods` (global functions to use in templates and child components). 
   * For example, you can  use the [`url` Universal Filter](https://www.11ty.dev/docs/filters/url/) like `url("/my-url/")` in your Vue templates.
 * `page` Eleventy supplied data is also available globally in all components.
+* Compiled components are cached in `cacheDirectory`: later builds skip compilation when no `.vue` file, imported module, plugin option, or Vue version has changed.
 * `.vue` files work as Eleventy layouts: render the child template with `v-html="content"` on an element, and chain to another layout by returning `layout` from `data`.
 
 ### Not Yet Available

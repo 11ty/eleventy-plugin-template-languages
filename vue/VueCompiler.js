@@ -1,6 +1,7 @@
 import path from "node:path";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
 import { glob as tinyglobby } from "tinyglobby";
 import { DeepCopy } from "@11ty/eleventy-utils";
@@ -9,7 +10,7 @@ import { rollup } from "rollup";
 import rollupPluginVue from "rollup-plugin-vue";
 import rollupPluginCssOnly from "rollup-plugin-css-only";
 
-import { createSSRApp } from "vue";
+import { createSSRApp, version as vueVersion } from "vue";
 import { parse as parseSFC, compileScript } from "vue/compiler-sfc";
 import { renderToString } from "@vue/server-renderer";
 
@@ -20,6 +21,8 @@ const debugDev = createDebug("Dev:Eleventy:Vue");
 
 // Compiled components are CommonJS so they can be evicted from the require cache on watch
 const require = createRequire(import.meta.url);
+
+const pkg = require("./package.json");
 
 const CASCADE_OVERRIDE_KEYS = ["page", "pagination", "eleventy", "buildawesome", "collections"];
 
@@ -327,6 +330,9 @@ export default class VueCompiler {
     }
 
     debug("Found these input files: %O", input);
+    if(!isSubsetOfFiles) {
+      this.setCacheInputs(input);
+    }
     let options = this.getMergedRollupOptions(input, isSubsetOfFiles);
     let bundle = await rollup(options);
     for(let file of bundle.watchFiles) {
@@ -367,9 +373,93 @@ export default class VueCompiler {
 
     debug("Writing rollup cache to file system %o", this.bypassRollupCacheFile);
     return fsp.writeFile(this.bypassRollupCacheFile, JSON.stringify({
+      key: this.getCacheKey(),
+      inputs: this.cacheInputs,
+      files: await this.getSourceFileHashes(),
       vueToJs: this.vueFileToJavaScriptFilenameMap,
       relationships: this.componentRelationships
     }, null, 2));
+  }
+
+  // Changes to versions or options invalidate the cache (functions, e.g. plugins, compare by source)
+  getCacheKey() {
+    try {
+      return JSON.stringify({
+        plugin: pkg.version,
+        vue: vueVersion,
+        rollupOptions: this.rollupOptions,
+        rollupPluginVueOptions: this.rollupPluginVueOptions,
+      }, (key, value) => typeof value === "function" ? value.toString() : value);
+    } catch(e) {
+      debug("Options are not serializable, skipping the rollup cache: %o", e.message);
+    }
+  }
+
+  // Hashes of every source file rollup read, keyed by path relative to the working directory
+  async getSourceFileHashes() {
+    let files = new Set();
+    for(let id of this.watchFiles) {
+      if(!id.startsWith("\0")) {
+        files.add(path.relative(this.workingDir, id.split("?")[0]));
+      }
+    }
+
+    let hashes = {};
+    for(let file of Array.from(files).sort()) {
+      try {
+        hashes[file] = createHash("sha256").update(await fsp.readFile(file)).digest("hex");
+      } catch {
+        // Not a file on disk
+      }
+    }
+    return hashes;
+  }
+
+  // Remember the entry files so a cache hit can be checked against them
+  setCacheInputs(input) {
+    this.cacheInputs = input.map(file => VueCompiler.forceForwardSlashOnFilePath(path.normalize(file))).sort();
+  }
+
+  async isRollupOutputCacheValid(input) {
+    if(!this.hasRollupOutputCache()) {
+      return false;
+    }
+
+    let cache;
+    try {
+      cache = JSON.parse(await fsp.readFile(this.bypassRollupCacheFile, "utf8"));
+    } catch {
+      return false;
+    }
+
+    let key = this.getCacheKey();
+    let inputs = input.map(file => VueCompiler.forceForwardSlashOnFilePath(path.normalize(file))).sort();
+    if(!key || cache.key !== key || JSON.stringify(cache.inputs) !== JSON.stringify(inputs) || !cache.files) {
+      debug("Rollup cache is stale: options or input files changed");
+      return false;
+    }
+
+    for(let file in cache.files) {
+      let hash;
+      try {
+        hash = createHash("sha256").update(await fsp.readFile(file)).digest("hex");
+      } catch {
+        // deleted
+      }
+      if(hash !== cache.files[file]) {
+        debug("Rollup cache is stale: %o changed", file);
+        return false;
+      }
+    }
+
+    for(let jsFilename of Object.values(cache.vueToJs || {})) {
+      if(!fs.existsSync(path.join(this.getFullCacheDir(), jsFilename))) {
+        debug("Rollup cache is stale: %o is missing", jsFilename);
+        return false;
+      }
+    }
+
+    return true;
   }
 
   async writeRollupOutputCacheCss(styleNodes) {
@@ -392,6 +482,8 @@ export default class VueCompiler {
 
   async loadRollupOutputCache() {
     debugDev("Using rollup file system cache to bypass rollup.");
+    this.vueFileToCSSMap = {};
+    this.componentsWriteCount = 0;
     let styleNodes = JSON.parse(await fsp.readFile(this.bypassRollupCacheCssFile, "utf8"));
     for(let localVuePath in styleNodes) {
       for(let css of styleNodes[localVuePath]) {
@@ -399,10 +491,13 @@ export default class VueCompiler {
       }
     }
 
-    let { vueToJs, relationships } = JSON.parse(await fsp.readFile(this.bypassRollupCacheFile, "utf8"));
+    let { vueToJs, relationships, files = {} } = JSON.parse(await fsp.readFile(this.bypassRollupCacheFile, "utf8"));
     this.vueFileToJavaScriptFilenameMap = vueToJs;
     this.componentRelationships = relationships;
     this.cssTreeCache.clear();
+    for(let file in files) {
+      this.watchFiles.add(path.resolve(this.workingDir, file));
+    }
   }
 
   // output is returned from .write() or .generate()
