@@ -1,12 +1,15 @@
 <template>
-	<html lang="en">
-		<title></title>
-		<template v-html="content"/>
-	</html>
+	<main :data-title="title" v-html="content"></main>
 </template>
+<style>
+main { color: rebeccapurple; }
+</style>
 <script>
 export default {
-	props: {},
-	components: {}
+	data: function() {
+		return {
+			layout: "base.njk",
+		};
+	},
 }
 </script>

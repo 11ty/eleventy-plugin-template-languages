@@ -99,3 +99,25 @@ test("configureApp option (plugin-template-languages#48)", async function () {
 	strictEqual(result.content, `<div><b>Eleventy</b><p>https://www.11ty.dev/</p></div>`);
 	deepStrictEqual(calls, ["/"]);
 });
+
+test("Vue as a layout file (plugin-template-languages#39)", async function () {
+	let elev = new Eleventy(path.relative(".", path.join(dirname, "stubs-layout")), undefined, {
+		config: (eleventyConfig) => {
+			eleventyConfig.addPlugin(VuePlugin, {
+				cacheDirectory: path.relative(".", path.join(dirname, "../.cache/build-test-layout/")),
+			});
+		},
+	});
+
+	let results = (await elev.toJSON()).sort((a, b) => a.url.localeCompare(b.url));
+	deepStrictEqual(results.map(({ url, content }) => ({ url, content })), [
+		{
+			url: "/",
+			content: `<!doctype html><title>Hello</title><style>main { color: rebeccapurple;\n}</style><main data-title="Hello"><h1>Markdown content</h1>\n</main>\n`,
+		},
+		{
+			url: "/vue-page/",
+			content: `<!doctype html><title>Vue page</title><style>main { color: rebeccapurple;\n}</style><main data-title="Vue page"><p>Vue page content</p></main>\n`,
+		},
+	]);
+});

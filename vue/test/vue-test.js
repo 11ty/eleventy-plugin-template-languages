@@ -220,33 +220,6 @@ test("Vue SFC CSS (one component, no children) Issue #10", async () => {
 }`);
 });
 
-test.skip("Vue as Layout file (Issue #26)", async () => {
-	let ev = new VueCompiler();
-	ev.setCacheDir("vue/.cache/vue-test-layout");
-	ev.setInputDir("vue/test/stubs-layout");
-	ev.setIncludesDir("_includes", true);
-	assert.deepEqual(Array.from(ev.ignores), []);
-
-	let files = await ev.findFiles();
-	assert.equal(files.length, 2);
-
-	let bundle = await ev.getBundle(files);
-	let output = await ev.write(bundle);
-
-	ev.createVueComponents(output);
-
-	let component = ev.getComponent("./vue/test/stubs-layout/page.vue");
-
-	assert.equal(await ev.renderComponent(component, {
-		page: {
-			url: "/some-url/"
-		}
-	}), `<html lang="en">
-	<title></title>
-	<div data-server-rendered="true">Child content</div>
-</html>`);
-});
-
 test("Vue SFC Data Leak", async () => {
 	let ev = new VueCompiler();
 	ev.setCacheDir("vue/.cache/vue-data-leak");
