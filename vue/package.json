@@ -54,6 +54,6 @@
 		"vue": "^3.5.41"
 	},
 	"devDependencies": {
-		"postcss-nested": "^5.0.6"
+		"postcss-nested": "^9.0.0"
 	}
 }

@@ -28,7 +28,7 @@
 		"test": "echo \"Error: run tests from root directory\" && exit 1"
 	},
 	"dependencies": {
-		"fast-glob": "^3.3.3",
+		"tinyglobby": "^0.2.17",
 		"mustache": "^4.2.0"
 	}
 }

@@ -1,7 +1,7 @@
 const fs = require("node:fs");
 
 const mustache = require("mustache");
-const fastglob = require("fast-glob");
+const { glob } = require("tinyglobby");
 const { TemplatePath } = require("@11ty/eleventy-utils");
 const debug = require("debug")("Eleventy:Mustache");
 
@@ -20,7 +20,7 @@ async function getPartials(directories, extensions) {
 	await Promise.all(
 		extensions.map(async function (extension) {
 			partialFiles = partialFiles.concat(
-				await fastglob(prefix + extension, {
+				await glob(prefix + extension, {
 					caseSensitiveMatch: false,
 					dot: true,
 				})
