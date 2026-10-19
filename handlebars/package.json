@@ -20,9 +20,10 @@
 	"author": "Zach Leatherman (https://zachleat.com/)",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/11ty/eleventy-plugin-template-languages.git"
+		"url": "git+https://github.com/11ty/plugin-template-languages.git",
+		"directory": "handlebars"
 	},
-	"bugs": "https://github.com/11ty/eleventy-plugin-template-languages/issues",
+	"bugs": "https://github.com/11ty/plugin-template-languages/issues",
 	"homepage": "https://www.11ty.dev/",
 	"scripts": {
 		"test": "echo \"Error: run tests from root directory\" && exit 1"

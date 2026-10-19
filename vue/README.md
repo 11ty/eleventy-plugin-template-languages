@@ -9,6 +9,10 @@ Read more about the goals of this plugin (and a full tutorial!) at [Eleventy and
 ## Installation
 
 ```sh
+# Prelease (Vue 3 or newer)
+npm install @11ty/eleventy-plugin-vue@canary
+
+# Latest (Vue 2)
 npm install @11ty/eleventy-plugin-vue
 ```
 
@@ -36,7 +40,7 @@ npm install @11ty/eleventy-plugin-vue
 * Works with Vue’s Single File Components, including with `scoped` CSS.
 * Component `<style>` blocks (plus those of every imported component) are added to Eleventy’s `css` [bundle](https://www.11ty.dev/docs/plugins/bundle/) for the page.
 * Data from SFC files feeds into the data cascade (similar to front matter)
-* All JavaScript Template Functions (see https://www.11ty.dev/docs/languages/javascript/#javascript-template-functions), Universal Filters, Universal Shortcodes, Universal Paired Shortcodes are available as Vue `methods` (global functions to use in templates and child components). 
+* All JavaScript Template Functions (see https://www.11ty.dev/docs/languages/javascript/#javascript-template-functions), Universal Filters, Universal Shortcodes, Universal Paired Shortcodes are available as Vue `methods` (global functions to use in templates and child components).
   * For example, you can  use the [`url` Universal Filter](https://www.11ty.dev/docs/filters/url/) like `url("/my-url/")` in your Vue templates.
 * `page` Eleventy supplied data is also available globally in all components.
 * Compiled components are cached in `cacheDirectory`: later builds skip compilation when no `.vue` file, imported module, plugin option, or Vue version has changed.

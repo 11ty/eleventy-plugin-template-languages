@@ -30,14 +30,15 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/11ty/eleventy-plugin-template-languages.git"
+		"url": "git+https://github.com/11ty/plugin-template-languages.git",
+		"directory": "pug"
 	},
 	"author": "Zearin",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/11ty/eleventy-plugin-template-languages/issues"
+		"url": "https://github.com/11ty/plugin-template-languages/issues"
 	},
-	"homepage": "https://github.com/11ty/eleventy-plugin-template-languages#readme",
+	"homepage": "https://github.com/11ty/plugin-template-languages#readme",
 	"engines": {
 		"node": ">=18"
 	},
