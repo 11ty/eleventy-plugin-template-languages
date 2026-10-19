@@ -6,7 +6,8 @@
 		"mustache",
 		"haml",
 		"pug",
-		"vue"
+		"vue",
+		"svelte"
 	],
 	"type": "module",
 	"scripts": {

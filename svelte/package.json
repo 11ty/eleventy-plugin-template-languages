@@ -1,0 +1,55 @@
+{
+	"name": "@11ty/eleventy-plugin-svelte",
+	"version": "1.0.0-alpha.1",
+	"description": "Use Svelte 5 components in Eleventy.",
+	"main": "svelteConfig.js",
+	"exports": {
+		".": "./svelteConfig.js",
+		"./SvelteCompiler": "./SvelteCompiler.js",
+		"./package.json": "./package.json"
+	},
+	"type": "module",
+	"engines": {
+		"node": ">=22"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"files": [
+		"svelteConfig.js",
+		"SvelteCompiler.js"
+	],
+	"funding": {
+		"type": "opencollective",
+		"url": "https://opencollective.com/11ty"
+	},
+	"keywords": [
+		"eleventy",
+		"eleventy-plugin"
+	],
+	"author": {
+		"name": "Zach Leatherman",
+		"url": "https://zachleat.com/"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/11ty/plugin-template-languages.git",
+		"directory": "svelte"
+	},
+	"bugs": "https://github.com/11ty/plugin-template-languages/issues",
+	"homepage": "https://www.11ty.dev/",
+	"scripts": {
+		"test": "echo \"Error: run tests from root directory\" && exit 1"
+	},
+	"11ty": {
+		"compatibility": ">=3.0.0"
+	},
+	"dependencies": {
+		"@11ty/eleventy-utils": "^2.0.7",
+		"obug": "^2.2.1",
+		"rollup": "^4.64.10",
+		"svelte": "^5.57.2",
+		"tinyglobby": "^0.2.17"
+	}
+}
