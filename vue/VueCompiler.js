@@ -60,7 +60,8 @@ export default class VueCompiler {
       // dir: this.cacheDir // set via setCacheDir
       entryFileNames: (chunkInfo) => {
         debugDev("Rollup chunk %o", chunkInfo.facadeModuleId);
-        return "[name].js";
+        // Rollup 3+ keeps the .vue extension in [name], strip it to keep `component.js` file names
+        return chunkInfo.name.replace(/\.vue$/, "") + ".js";
       }
     };
 

@@ -49,8 +49,8 @@
 		"debug": "^4.4.3",
 		"fast-glob": "^3.3.3",
 		"lodash.merge": "^4.6.2",
-		"rollup": "^2.80.0",
-		"rollup-plugin-css-only": "^3.1.0",
+		"rollup": "^4.64.10",
+		"rollup-plugin-css-only": "^4.5.5",
 		"rollup-plugin-vue": "^6.0.0",
 		"vue": "^3.5.41"
 	},
