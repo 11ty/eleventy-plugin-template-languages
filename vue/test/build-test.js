@@ -79,3 +79,23 @@ test("Template strings don’t share a compile cache key with the component", as
 	let { getCacheKey } = elev.eleventyConfig.userConfig.extensionMap.values().find((entry) => entry.key === "vue").compileOptions;
 	ok(getCacheKey("<p>Hi</p>", "./index.vue") !== getCacheKey("", "./index.vue"));
 });
+
+test("configureApp option (plugin-template-languages#48)", async function () {
+	let calls = [];
+	let elev = new Eleventy(path.relative(".", path.join(dirname, "stubs-configure-app")), undefined, {
+		config: (eleventyConfig) => {
+			eleventyConfig.addPlugin(VuePlugin, {
+				cacheDirectory: path.relative(".", path.join(dirname, "../.cache/build-test-configure-app/")),
+				configureApp(app, data) {
+					calls.push(data.page.url);
+					app.component("site-name", { template: "<b>Eleventy</b>" });
+					app.config.globalProperties.$siteUrl = "https://www.11ty.dev/";
+				},
+			});
+		},
+	});
+
+	let [result] = await elev.toJSON();
+	strictEqual(result.content, `<div><b>Eleventy</b><p>https://www.11ty.dev/</p></div>`);
+	deepStrictEqual(calls, ["/"]);
+});

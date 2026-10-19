@@ -102,6 +102,12 @@ export default function(eleventyConfig) {
       }
     },
 
+    // Customize the Vue app before each render (may be async)
+    configureApp(app, data) {
+      app.component("my-global-component", MyGlobalComponent);
+      app.config.globalProperties.$site = data.site;
+    },
+
     // Passed to rollup.rollup
     rollupOptions: {
       // Declare your own external dependencies
@@ -114,7 +120,9 @@ export default function(eleventyConfig) {
 }
 ```
 
-For a full list of `rollupPluginVueOptions`, see [`rollup-plugin-vue`’s Options](https://rollup-plugin-vue.vuejs.org/options.html#include).
+For a full list of `rollupPluginVueOptions`, see [`rollup-plugin-vue`’s Options](https://rollup-plugin-vue.vuejs.org/options.html#include). To leave custom elements to the browser, use `rollupPluginVueOptions: { compilerOptions: { isCustomElement: tag => tag.includes("-") } }`.
+
+`configureApp` receives the [Vue app instance](https://vuejs.org/api/application.html) and the page’s data, see [`app.config`](https://vuejs.org/api/application.html#app-config).
 
 #### Advanced: Run async things before component render
 

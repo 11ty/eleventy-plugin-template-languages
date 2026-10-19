@@ -196,6 +196,11 @@ export default class VueCompiler {
     return options;
   }
 
+  // Called with the Vue app and page data before each render
+  setConfigureApp(configureApp) {
+    this.configureApp = configureApp;
+  }
+
   setRollupPluginVueOptions(rollupPluginVueOptions) {
     this.rollupPluginVueOptions = rollupPluginVueOptions;
   }
@@ -589,14 +594,6 @@ export default class VueCompiler {
     // https://v3.vuejs.org/api/application-config.html#globalproperties
     app.config.globalProperties.page = pageData.page;
 
-    // TODO hook for app modifications
-    // app.config.warnHandler = function(msg, vm, trace) {
-    //   console.log( "[Vue 11ty] Warning", msg, vm, trace );
-    // };
-    // app.config.errorHandler = function(msg, vm, info) {
-    //   console.log( "[Vue 11ty] Error", msg, vm, info );
-    // };
-
     // Read-only fallback so child components can reach cascade data (e.g. `eleventy`)
     for(let key in pageData) {
       if(!(key in app.config.globalProperties)) {
@@ -622,6 +619,10 @@ export default class VueCompiler {
         }
       },
     });
+
+    if(typeof this.configureApp === "function") {
+      await this.configureApp(app, pageData);
+    }
 
     // returns a promise
     return renderToString(app);

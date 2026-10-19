@@ -27,6 +27,9 @@ const globalOptions = {
 
   // See https://www.11ty.dev/docs/plugins/bundle/#asset-bucketing
   cssBundleBucket: undefined,
+
+  // Customize the Vue app before each render, e.g. `app.component()` or `app.config`
+  configureApp: undefined, // function(app, data)
 };
 
 export default function(eleventyConfig, configGlobalOptions = {}) {
@@ -45,6 +48,7 @@ export default function(eleventyConfig, configGlobalOptions = {}) {
   let vueCompiler = new VueCompiler();
   vueCompiler.setCacheDir(options.cacheDirectory);
   vueCompiler.setReadOnly(options.readOnly);
+  vueCompiler.setConfigureApp(options.configureApp);
 
   if(options.cssBundleName) {
     // No-op if the bundle already exists
