@@ -102,6 +102,8 @@ export default class VueCompiler {
     this.rollupBundleOptions = {
       format: "cjs", // because we’re consuming these in node. See also "esm"
       exports: "auto",
+      // Tags `import()` namespaces as modules so `defineAsyncComponent` unwraps `default`
+      generatedCode: { symbols: true },
       preserveModules: true, // keeps separate files on the file system
       // dir: this.cacheDir // set via setCacheDir
       entryFileNames: (chunkInfo) => {

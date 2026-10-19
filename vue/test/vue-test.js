@@ -377,3 +377,14 @@ test("Component tree CSS loads from the rollup output cache", async () => {
 	assert.deepEqual(cached.getCSSForComponentTree("./vue/test/stubs-c/data.vue"), ev.getCSSForComponentTree("./vue/test/stubs-c/data.vue"));
 	assert.equal(cached.getCSSForComponentTree("./vue/test/stubs-c/data.vue").length, 3);
 });
+
+test("Dynamically imported component (plugin-template-languages#49)", async () => {
+	let ev = new VueCompiler();
+	ev.setCacheDir("vue/.cache/vue-test-dynamic-import");
+	ev.setInputDir("vue/test/stubs-dynamic-import");
+	ev.setIncludesDir("_includes");
+	ev.createVueComponents(await ev.write(await ev.getBundle()));
+
+	let component = ev.getComponent("./vue/test/stubs-dynamic-import/index.vue");
+	assert.equal(await ev.renderComponent(component, {}), `<div><p>Dynamic child</p></div>`);
+});
