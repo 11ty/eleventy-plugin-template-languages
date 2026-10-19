@@ -12,7 +12,7 @@
 	"scripts": {
 		"lint": "eslint",
 		"format": "prettier . --write",
-		"test": "node scripts/test.js",
+		"test": "node .scripts/test.js",
 		"test-only": "node --test --test-only",
 		"test-watch": "node --test --watch",
 		"test-coverage": "node --test --experimental-test-coverage --test-reporter=spec"
