@@ -111,8 +111,7 @@ test("Vue as a layout file (plugin-template-languages#39)", async function () {
 	});
 
 	let results = (await elev.toJSON()).sort((a, b) => a.url.localeCompare(b.url));
-	// Windows checkouts may convert fixture line endings to CRLF
-	deepStrictEqual(results.map(({ url, content }) => ({ url, content: content.replace(/\r\n/g, "\n") })), [
+	deepStrictEqual(results.map(({ url, content }) => ({ url, content })), [
 		{
 			url: "/",
 			content: `<!doctype html><title>Hello</title><style>main { color: rebeccapurple;\n}</style><main data-title="Hello"><h1>Markdown content</h1>\n</main>\n`,
