@@ -10,6 +10,7 @@ import rollupPluginVue from "rollup-plugin-vue";
 import rollupPluginCssOnly from "rollup-plugin-css-only";
 
 import { createSSRApp } from "vue";
+import { parse as parseSFC, compileScript } from "vue/compiler-sfc";
 import { renderToString } from "@vue/server-renderer";
 
 import debugUtil from "debug";
@@ -19,6 +20,46 @@ const debugDev = debugUtil("Dev:Eleventy:Vue");
 
 // Compiled components are CommonJS so they can be evicted from the require cache on watch
 const require = createRequire(import.meta.url);
+
+const CASCADE_OVERRIDE_KEYS = ["page", "pagination", "eleventy", "buildawesome", "collections"];
+
+// rollup-plugin-vue crashes formatting <script> syntax errors (reads `loc.start` on a Babel `{ line, column }` loc), so recompile to recover the original error.
+function getScriptSyntaxError(code, filename) {
+  let { descriptor } = parseSFC(code, { filename });
+  let block = descriptor.script || descriptor.scriptSetup;
+  if(!block) {
+    return;
+  }
+  try {
+    compileScript(descriptor, { id: "eleventy-vue-error" });
+  } catch(e) {
+    if(e.loc?.line !== undefined) {
+      // Babel locations are relative to the <script> block content
+      e.loc = {
+        file: filename,
+        line: block.loc.start.line + e.loc.line - 1,
+        column: e.loc.line === 1 ? block.loc.start.column + e.loc.column : e.loc.column,
+      };
+    }
+    return e;
+  }
+}
+
+function withScriptSyntaxErrors(plugin) {
+  let transform = plugin.transform;
+  plugin.transform = async function(code, id) {
+    try {
+      return await transform.call(this, code, id);
+    } catch(e) {
+      let syntaxError = !id.includes("?") && id.endsWith(".vue") ? getScriptSyntaxError(code, id) : undefined;
+      if(syntaxError) {
+        this.error({ message: syntaxError.message, loc: syntaxError.loc, cause: syntaxError });
+      }
+      throw e;
+    }
+  };
+  return plugin;
+}
 
 function addLeadingDotSlash(pathArg) {
   if (pathArg === "." || pathArg === "..") {
@@ -126,7 +167,7 @@ export default class VueCompiler {
         "@vue/server-renderer",
       ],
       plugins: [
-        rollupPluginVue(this.getRollupPluginVueOptions()),
+        withScriptSyntaxErrors(rollupPluginVue(this.getRollupPluginVueOptions())),
         rollupPluginCssOnly({
           output: async (styles, styleNodes) => {
             this.resetCSSFor(styleNodes);
@@ -552,12 +593,29 @@ export default class VueCompiler {
     //   console.log( "[Vue 11ty] Error", msg, vm, info );
     // };
 
+    // Read-only fallback so child components can reach cascade data (e.g. `eleventy`)
+    for(let key in pageData) {
+      if(!(key in app.config.globalProperties)) {
+        app.config.globalProperties[key] = pageData[key];
+      }
+    }
+
     app.mixin(mixin);
 
-    // Full data cascade is available to the root template component
+    // Full data cascade is available to the root template component (a copy, Vue mutates the returned object)
     app.mixin({
       data: function() {
-        return pageData;
+        return this.$parent ? {} : { ...pageData };
+      },
+      created: function() {
+        // Eleventy-computed values (e.g. resolved `pagination.items`) win over the component’s own data
+        if(!this.$parent) {
+          for(let key of CASCADE_OVERRIDE_KEYS) {
+            if(key in pageData) {
+              this[key] = pageData[key];
+            }
+          }
+        }
       },
     });
 

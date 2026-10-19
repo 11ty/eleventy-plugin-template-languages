@@ -351,3 +351,18 @@ body {
 		color: black;
 }`);
 });
+
+test("Child component data is per-instance with async serverPrefetch (eleventy-plugin-vue#46)", async () => {
+	let ev = new VueCompiler();
+	ev.setCacheDir("vue/.cache/vue-test-serverprefetch");
+	ev.setInputDir("vue/test/stubs-serverprefetch");
+	ev.setIncludesDir("_includes");
+
+	let bundle = await ev.getBundle();
+	ev.createVueComponents(await ev.write(bundle));
+
+	let component = ev.getComponent("./vue/test/stubs-serverprefetch/index.vue");
+	let data = { page: { url: "/" }, eleventy: { generator: "Eleventy" }, buildawesome: { generator: "Build Awesome" } };
+	assert.equal(await ev.renderComponent(component, data), `<div><!--[--><p>A Eleventy Build Awesome</p><p>B Eleventy Build Awesome</p><p>C Eleventy Build Awesome</p><!--]--></div>`);
+	assert.deepEqual(Object.keys(data), ["page", "eleventy", "buildawesome"]);
+});

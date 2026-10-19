@@ -151,8 +151,10 @@ export default function(eleventyConfig, configGlobalOptions = {}) {
   
           vueCompiler.createVueComponents(output);
         } catch(e) {
-          if(e.loc) {
-            e.message = `Error in Vue file ${e.loc.file} on Line ${e.loc.line} Column ${e.loc.column}: ${e.message}`
+          // loc is `{ file, line, column }` or `{ start: { line, column } }`
+          let loc = e.loc?.start || e.loc;
+          if(loc?.line !== undefined) {
+            e.message = `Error in Vue file ${e.loc.file || e.id} on Line ${loc.line} Column ${loc.column}: ${e.message}`;
           }
           throw e;
         }
