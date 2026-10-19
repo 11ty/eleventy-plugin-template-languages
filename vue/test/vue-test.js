@@ -42,6 +42,27 @@ test("Relative Directories", () => {
 	assert.deepEqual(Array.from(ev.ignores), []);
 });
 
+test("findFiles with includes and layouts outside the input directory", async () => {
+	let stubs = path.relative(".", path.join(import.meta.dirname, "stubs-b"));
+	let ev = new VueCompiler();
+	ev.setCacheDir(".cache");
+	ev.setInputDir(stubs);
+	ev.setIncludesDir("../stubs-c/_includes");
+	ev.setLayoutsDir("../stubs-d/_includes");
+	ev.resetIgnores();
+
+	let files = (await ev.findFiles()).map(file => path.relative(stubs, file).split(path.sep).join("/")).sort();
+	assert.deepEqual(files, [
+		"../stubs-c/_includes/child.vue",
+		"../stubs-c/_includes/grandchild.vue",
+		"../stubs-d/_includes/child.vue",
+		"../stubs-d/_includes/grandchild.vue",
+		"_includes/child.vue",
+		"_includes/grandchild.vue",
+		"data.vue",
+	]);
+});
+
 test("Can use relative path for cache directory", () => {
 	let ev = getEvInstance();
 	ev.setCacheDir(".cache");
