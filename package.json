@@ -5,7 +5,8 @@
 		"handlebars",
 		"mustache",
 		"haml",
-		"pug"
+		"pug",
+		"vue"
 	],
 	"type": "module",
 	"scripts": {

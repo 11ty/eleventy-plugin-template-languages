@@ -13,6 +13,7 @@ const compat = new FlatCompat({
 });
 
 export default [
+	{ ignores: ["**/.cache/"] },
 	...compat.extends("eslint:recommended", "prettier"),
 	{
 		languageOptions: {

@@ -5,3 +5,4 @@
 - [`@11ty/eleventy-plugin-mustache` in `mustache/`](./mustache/README.md)
 - [`@11ty/eleventy-plugin-haml` in `haml/`](./haml/README.md)
 - [`@11ty/eleventy-plugin-pug` in `pug/`](./pug/README.md)
+- [`@11ty/eleventy-plugin-vue` in `vue/`](./vue/README.md)

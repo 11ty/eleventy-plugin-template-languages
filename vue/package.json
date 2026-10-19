@@ -1,0 +1,60 @@
+{
+	"name": "@11ty/eleventy-plugin-vue",
+	"version": "2.0.0-alpha.1",
+	"description": "Use Vue 3 Single File Components (SFC) in Eleventy.",
+	"main": "vueConfig.js",
+	"exports": {
+		".": "./vueConfig.js",
+		"./VueCompiler": "./VueCompiler.js",
+		"./package.json": "./package.json"
+	},
+	"type": "module",
+	"engines": {
+		"node": ">=22"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"files": [
+		"!test"
+	],
+	"funding": {
+		"type": "opencollective",
+		"url": "https://opencollective.com/11ty"
+	},
+	"keywords": [
+		"eleventy",
+		"eleventy-plugin"
+	],
+	"author": {
+		"name": "Zach Leatherman",
+		"url": "https://zachleat.com/"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/11ty/eleventy-plugin-template-languages.git"
+	},
+	"bugs": "https://github.com/11ty/eleventy-plugin-template-languages/issues",
+	"homepage": "https://www.11ty.dev/",
+	"scripts": {
+		"test": "echo \"Error: run tests from root directory\" && exit 1"
+	},
+	"11ty": {
+		"compatibility": ">=3.0.0"
+	},
+	"dependencies": {
+		"@11ty/eleventy-assets": "^1.0.6",
+		"@vue/server-renderer": "^3.5.41",
+		"debug": "^4.4.3",
+		"fast-glob": "^3.3.3",
+		"lodash.merge": "^4.6.2",
+		"rollup": "^2.80.0",
+		"rollup-plugin-css-only": "^3.1.0",
+		"rollup-plugin-vue": "^6.0.0",
+		"vue": "^3.5.41"
+	},
+	"devDependencies": {
+		"postcss-nested": "^5.0.6"
+	}
+}
