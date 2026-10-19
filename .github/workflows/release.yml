@@ -1,0 +1,28 @@
+name: Publish Release to npm
+on:
+  release:
+    types: [published]
+permissions: read-all
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: GitHub Publish
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
+      - run: npm ci
+      - run: npm test
+      - if: ${{ github.event.release.tag_name != '' && env.NPM_PUBLISH_TAG != '' && env.NPM_WORKSPACE != '' }}
+        # Approve with `npm stage approve <stage-id>`
+        run: npm stage publish --provenance --access=public --tag=${{ env.NPM_PUBLISH_TAG }} --workspace=${{ env.NPM_WORKSPACE }}
+        env:
+          NPM_PUBLISH_TAG: ${{ contains(github.event.release.tag_name, '-alpha.') && 'canary' || contains(github.event.release.tag_name, '-beta.') && 'beta' || 'latest' }}
+          # tag names must be formatted like vue-1.0.0
+          NPM_WORKSPACE: ${{ startsWith(github.event.release.tag_name, 'ejs-') && 'ejs' || startsWith(github.event.release.tag_name, 'handlebars-') && 'handlebars' || startsWith(github.event.release.tag_name, 'mustache-') && 'mustache' || startsWith(github.event.release.tag_name, 'haml-') && 'haml' || startsWith(github.event.release.tag_name, 'pug-') && 'pug' || startsWith(github.event.release.tag_name, 'vue-') && 'vue' || 'unknown-tag-prefix' }}
