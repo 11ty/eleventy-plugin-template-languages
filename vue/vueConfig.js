@@ -1,13 +1,12 @@
 import path from "node:path";
 import fs from "node:fs";
-import lodashMerge from "lodash.merge";
-import debugUtil from "debug";
-import { InlineCodeManager } from "@11ty/eleventy-assets";
+import { DeepCopy } from "@11ty/eleventy-utils";
+import { createDebug } from "obug";
 import { version } from "vue";
 
 import VueCompiler from "./VueCompiler.js";
 
-const debug = debugUtil("Eleventy:Vue");
+const debug = createDebug("Eleventy:Vue");
 const pkg = JSON.parse(fs.readFileSync(new URL("./package.json", import.meta.url), "utf8"));
 
 const globalOptions = {
@@ -23,9 +22,11 @@ const globalOptions = {
   // See https://rollup-plugin-vue.vuejs.org/options.html
   rollupPluginVueOptions: {},
 
-  assets: {
-    css: null
-  } // optional `eleventy-assets` instances
+  // Eleventy bundle that component <style> blocks are added to, output with `{% getBundle "css" %}`
+  cssBundleName: "css",
+
+  // See https://www.11ty.dev/docs/plugins/bundle/#asset-bucketing
+  cssBundleBucket: undefined,
 };
 
 export default function(eleventyConfig, configGlobalOptions = {}) {
@@ -35,32 +36,34 @@ export default function(eleventyConfig, configGlobalOptions = {}) {
     console.log( `WARN: Eleventy Plugin (${pkg.name}) Compatibility: ${e.message}` );
   }
 
-  let options = lodashMerge({}, globalOptions, configGlobalOptions);
+  if("assets" in configGlobalOptions) {
+    console.log( `WARN: Eleventy Plugin (${pkg.name}): the \`assets\` option and \`getVueComponentCssForPage\` filter were removed. Component CSS is now added to Eleventy’s \`css\` bundle, use \`{% getBundle "css" %}\` instead.` );
+  }
+
+  let options = DeepCopy({}, globalOptions, configGlobalOptions);
 
   let vueCompiler = new VueCompiler();
   vueCompiler.setCacheDir(options.cacheDirectory);
   vueCompiler.setReadOnly(options.readOnly);
 
-  let cssManager = options.assets.css || new InlineCodeManager();
-  vueCompiler.setCssManager(cssManager);
+  if(options.cssBundleName) {
+    // No-op if the bundle already exists
+    eleventyConfig.addBundle(options.cssBundleName, {
+      outputFileExtension: "css",
+    });
+  }
 
   let changedVueFilesOnWatch = [];
   let skipVueBuild = false;
 
-  // Only add this filter if you’re not re-using your own asset manager.
-  // TODO Add warnings to readme
-  // * This will probably only work in a layout template.
-  // * Probably complications with components that are only used in a layout template.
-  eleventyConfig.addFilter("getVueComponentCssForPage", (url) => {
-    let components = cssManager.getComponentListForUrl(url);
-    let css = cssManager.getCodeForUrl(url);
-    debug("Component CSS for %o component count: %o, CSS size: %o: %O", url, components.length, css.length, components);
-    return css;
-  });
-
   let eleventyIgnores;
   eleventyConfig.on("eleventy.ignores", ignores => {
     eleventyIgnores = ignores;
+  });
+
+  let eleventyDirectories;
+  eleventyConfig.on("eleventy.directories", directories => {
+    eleventyDirectories = directories;
   });
 
   // Default output
@@ -110,7 +113,7 @@ export default function(eleventyConfig, configGlobalOptions = {}) {
       return vueCompiler.getComponent(inputPath);
     },
     init: async function() {
-      let { input, includes, layouts } = this.config.directories;
+      let { input, includes, layouts } = eleventyDirectories || this.config.directories;
       vueCompiler.setInputDir(input);
       vueCompiler.setIncludesDir(path.relative(input, includes));
       vueCompiler.setLayoutsDir(layouts ? path.relative(input, layouts) : undefined);
@@ -170,6 +173,10 @@ export default function(eleventyConfig, configGlobalOptions = {}) {
       cache: true,
       permalink: "raw",
       getCacheKey: function(str, inputPath) {
+        // Template strings (e.g. via the Render plugin) must not share a cache entry with the component
+        if(typeof str === "string" && str) {
+          return `${inputPath}::${str}`;
+        }
         return inputPath;
       },
     },
@@ -187,20 +194,20 @@ export default function(eleventyConfig, configGlobalOptions = {}) {
           if(typeof str === "function") {
             return str(data);
           }
-          if(typeof str === "string" && str.trim().charAt("0") === "<") {
+          if(typeof str === "string" && str.trim().charAt(0) === "<") {
             return vueCompiler.renderString(str, data, vueMixin);
           }
           return str;
         }
 
         let vueComponent = vueCompiler.getComponent(inputPath);
-        let componentName = vueCompiler.getJavaScriptComponentFile(inputPath);
 
         // if user attempts to render a Vue template in `serverPrefetch` or `data` to add to the data cascade
         // this will fail because data.page does not exist yet!
-        if(data.page) {
-          debug("Vue CSS: Adding component %o to %o", componentName, data.page.url);
-          cssManager.addComponentForUrl(componentName, data.page.url);
+        if(data.page && options.cssBundleName) {
+          let styles = vueCompiler.getCSSForComponentTree(inputPath);
+          debug("Vue CSS: Adding %o block(s) from %o to %o", styles.length, inputPath, data.page.url);
+          eleventyConfig.getBundleManagers()[options.cssBundleName].addToPage(data.page.url, styles, options.cssBundleBucket);
         }
 
         return vueCompiler.renderComponent(vueComponent, data, vueMixin);

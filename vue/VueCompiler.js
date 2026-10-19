@@ -2,8 +2,8 @@ import path from "node:path";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import { createRequire } from "node:module";
-import fastglob from "fast-glob";
-import lodashMerge from "lodash.merge";
+import { glob as tinyglobby } from "tinyglobby";
+import { DeepCopy } from "@11ty/eleventy-utils";
 
 import { rollup } from "rollup";
 import rollupPluginVue from "rollup-plugin-vue";
@@ -13,10 +13,10 @@ import { createSSRApp } from "vue";
 import { parse as parseSFC, compileScript } from "vue/compiler-sfc";
 import { renderToString } from "@vue/server-renderer";
 
-import debugUtil from "debug";
+import { createDebug } from "obug";
 
-const debug = debugUtil("Eleventy:Vue");
-const debugDev = debugUtil("Dev:Eleventy:Vue");
+const debug = createDebug("Eleventy:Vue");
+const debugDev = createDebug("Dev:Eleventy:Vue");
 
 // Compiled components are CommonJS so they can be evicted from the require cache on watch
 const require = createRequire(import.meta.url);
@@ -59,6 +59,11 @@ function withScriptSyntaxErrors(plugin) {
     }
   };
   return plugin;
+}
+
+// Trailing separator so `src/components` doesn’t match `src/components-legacy`
+function isInsideDirectory(filePath, dir) {
+  return filePath.startsWith(dir.endsWith(path.sep) ? dir : dir + path.sep);
 }
 
 function addLeadingDotSlash(pathArg) {
@@ -143,10 +148,6 @@ export default class VueCompiler {
     this.vueFileToCSSMap[localVuePath] = [];
   }
 
-  setCssManager(cssManager) {
-    this.cssManager = cssManager;
-  }
-
   setRollupOptions(options) {
     this.rollupOptions = options;
   }
@@ -198,7 +199,7 @@ export default class VueCompiler {
   }
 
   getRollupPluginVueOptions() {
-    return lodashMerge({
+    return DeepCopy({
       target: "node",
       exposeFilename: true,
       // preprocessStyles: false, // false is default
@@ -274,7 +275,7 @@ export default class VueCompiler {
   }
 
   isIncludeFile(filepath) {
-    return filepath.startsWith(this.includesDir);
+    return isInsideDirectory(filepath, this.includesDir);
   }
 
   // TODO pass in a filename and only clear the appropriate files
@@ -297,7 +298,7 @@ export default class VueCompiler {
     ];
 
     if(this.includesDir) {
-      if(!this.includesDir.startsWith(this.inputDir)) {
+      if(!isInsideDirectory(this.includesDir, this.inputDir)) {
         globPaths.push(
           addLeadingDotSlash(path.join(this.relativeIncludesDir, glob))
         );
@@ -305,7 +306,7 @@ export default class VueCompiler {
     }
 
     if(this.layoutsDir) {
-      if(!this.layoutsDir.startsWith(this.inputDir)) {
+      if(!isInsideDirectory(this.layoutsDir, this.inputDir)) {
         globPaths.push(
           addLeadingDotSlash(path.join(this.relativeLayoutsDir, glob))
         );
@@ -317,12 +318,13 @@ export default class VueCompiler {
     globPaths = globPaths.map(path => VueCompiler.forceForwardSlashOnFilePath(path));
     debug("Looking for %O and ignoring %O", globPaths, ignores);
 
-    // MUST use forward slashes here (even in Windows), per fast-glob requirements
-    return fastglob(globPaths, {
+    // MUST use forward slashes here (even in Windows), per tinyglobby requirements
+    let files = await tinyglobby(globPaths, {
       caseSensitiveMatch: false,
       // dot: true,
       ignore: ignores,
     });
+    return files.sort();
   }
 
   // Glob is optional
@@ -414,24 +416,6 @@ export default class VueCompiler {
     let { vueToJs, relationships } = JSON.parse(await fsp.readFile(this.bypassRollupCacheFile, "utf8"));
     this.vueFileToJavaScriptFilenameMap = vueToJs;
     this.componentRelationships = relationships;
-
-    if(this.cssManager) {
-      // Re-insert CSS code in the CSS manager
-      for(let localVuePath in vueToJs) {
-        localVuePath = VueCompiler.normalizeOperatingSystemFilePath(localVuePath);
-
-        let css = this.getCSSForComponent(localVuePath);
-        if(css) {
-          let jsFilename = vueToJs[localVuePath];
-          this.cssManager.addComponentCode(jsFilename, css);
-        }
-      }
-
-      // Re-establish both component relationships
-      for(let relation of this.componentRelationships) {
-        this.cssManager.addComponentRelationship(relation.from, relation.to);
-      }
-    }
   }
 
   // output is returned from .write() or .generate()
@@ -453,27 +437,12 @@ export default class VueCompiler {
         this.componentsWriteCount++;
 
         css = this.getCSSForComponent(inputPath);
-        if(css && this.cssManager) {
-          this.cssManager.addComponentCode(jsFilename, css);
-        }
       }
 
-      if(this.cssManager) {
-        // If you import it, it will roll up the imported CSS in the CSS manager
-        let importList = entry.imports || [];
-        // debugDev("filename: %o importedBindings:", entry.fileName, Object.keys(entry.importedBindings));
-        debugDev("filename: %o imports:", entry.fileName, entry.imports);
-        // debugDev("modules: %O", Object.keys(entry.modules));
-
-        for(let importFilename of importList) {
-          // TODO is this necessary?
-          if(importFilename.endsWith(path.join("vue-runtime-helpers/dist/normalize-component.js"))) {
-            continue;
-          }
-
-          this.componentRelationships.push({ from: jsFilename, to: importFilename });
-          this.cssManager.addComponentRelationship(jsFilename, importFilename);
-        }
+      // If you import it, the imported CSS rolls up into the parent component
+      debugDev("filename: %o imports:", entry.fileName, entry.imports);
+      for(let importFilename of entry.imports || []) {
+        this.componentRelationships.push({ from: jsFilename, to: importFilename });
       }
 
       debugDev("Created %o from %o" + (css ? " w/ CSS" : " without CSS") + (intermediateComponent ? " (intermediate/connector component)" : ""), jsFilename, inputPath);
@@ -497,11 +466,6 @@ export default class VueCompiler {
     for(let fullVuePath in styleNodes) {
       let localVuePath = this.getLocalVueFilePath(fullVuePath);
       delete this.vueFileToCSSMap[localVuePath];
-
-      if(this.cssManager) {
-        let jsFilename = this.getJavaScriptComponentFile(localVuePath);
-        this.cssManager.resetComponentCodeFor(jsFilename);
-      }
     }
   }
 
@@ -536,6 +500,44 @@ export default class VueCompiler {
     let css = (this.vueFileToCSSMap[localVuePath] || []).join("\n");
     debugDev("Getting CSS for component: %o, length: %o", localVuePath, css.length);
     return css;
+  }
+
+  // CSS blocks for a component and everything it imports, deepest first
+  getCSSForComponentTree(localVuePath) {
+    let entryFilename = this.getJavaScriptComponentFile(localVuePath);
+    if(!entryFilename) {
+      return [];
+    }
+
+    let imports = {};
+    for(let { from, to } of this.componentRelationships) {
+      (imports[from] ||= []).push(to);
+    }
+
+    let cssByFilename = {};
+    for(let vuePath in this.vueFileToJavaScriptFilenameMap) {
+      cssByFilename[this.vueFileToJavaScriptFilenameMap[vuePath]] = this.getCSSForComponent(vuePath);
+    }
+
+    let seen = new Set();
+    let styles = [];
+    let walk = (jsFilename) => {
+      if(seen.has(jsFilename)) {
+        return;
+      }
+      seen.add(jsFilename);
+
+      for(let dependency of imports[jsFilename] || []) {
+        walk(dependency);
+      }
+
+      if(cssByFilename[jsFilename]) {
+        styles.push(cssByFilename[jsFilename]);
+      }
+    };
+    walk(entryFilename);
+
+    return styles;
   }
 
   /* Map from vue files to compiled JavaScript files */

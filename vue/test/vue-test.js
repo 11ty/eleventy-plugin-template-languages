@@ -1,7 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert";
 import path from "node:path";
-import { InlineCodeManager } from "@11ty/eleventy-assets";
 import postcssNested from "postcss-nested";
 
 import VueCompiler from "../VueCompiler.js";
@@ -136,9 +135,6 @@ test("Vue SFC CSS", async () => {
 	ev.setInputDir("vue/test/stubs-c");
 	ev.setIncludesDir("_includes");
 
-	let cssMgr = new InlineCodeManager();
-	ev.setCssManager(cssMgr);
-
 	let files = await ev.findFiles();
 	let bundle = await ev.getBundle(files);
 	let output = await ev.write(bundle);
@@ -156,16 +152,10 @@ body {
 	assert.equal(normalizeNewLines(ev.getCSSForComponent("./vue/test/stubs-c/_includes/child.vue")), `#child { color: green;
 }`);
 
-	let componentName = ev.getJavaScriptComponentFile("./vue/test/stubs-c/data.vue");
-	cssMgr.addComponentForUrl(componentName, "/data/");
-
-	assert.equal(normalizeNewLines(cssMgr.getCodeForUrl("/data/")), `/* _includes/grandchild.js Component */
-#grandchild { color: yellow;
+	assert.equal(normalizeNewLines(ev.getCSSForComponentTree("./vue/test/stubs-c/data.vue").join("\n")), `#grandchild { color: yellow;
 }
-/* _includes/child.js Component */
 #child { color: green;
 }
-/* data.js Component */
 body {
 	background-color: blue;
 }
@@ -179,9 +169,6 @@ test("Vue SFC CSS (one input file)", async () => {
 	ev.setCacheDir("vue/.cache/vue-test-d");
 	ev.setInputDir("vue/test/stubs-d");
 	ev.setIncludesDir("_includes");
-
-	let cssMgr = new InlineCodeManager();
-	ev.setCssManager(cssMgr);
 
 	let inputFile = path.join(process.cwd(), "vue/test/stubs-d/data.vue");
 	let files = [inputFile];
@@ -201,16 +188,10 @@ body {
 	assert.equal(normalizeNewLines(ev.getCSSForComponent("./vue/test/stubs-d/_includes/child.vue")), `#child { color: green;
 }`);
 
-	let componentName = ev.getJavaScriptComponentFile("./vue/test/stubs-d/data.vue");
-	cssMgr.addComponentForUrl(componentName, "/data/");
-
-	assert.equal(normalizeNewLines(cssMgr.getCodeForUrl("/data/")), `/* _includes/grandchild.js Component */
-#grandchild { color: yellow;
+	assert.equal(normalizeNewLines(ev.getCSSForComponentTree("./vue/test/stubs-d/data.vue").join("\n")), `#grandchild { color: yellow;
 }
-/* _includes/child.js Component */
 #child { color: green;
 }
-/* data.js Component */
 body {
 	background-color: blue;
 }
@@ -225,9 +206,6 @@ test("Vue SFC CSS (one component, no children) Issue #10", async () => {
 	ev.setInputDir("vue/test/stubs-e");
 	ev.setIncludesDir("_includes");
 
-	let cssMgr = new InlineCodeManager();
-	ev.setCssManager(cssMgr);
-
 	let bundle = await ev.getBundle();
 	let output = await ev.write(bundle);
 
@@ -237,11 +215,7 @@ test("Vue SFC CSS (one component, no children) Issue #10", async () => {
 	background-color: blue;
 }`);
 
-	let componentName = ev.getJavaScriptComponentFile("./vue/test/stubs-e/data.vue");
-	cssMgr.addComponentForUrl(componentName, "/data/");
-
-	assert.equal(normalizeNewLines(cssMgr.getCodeForUrl("/data/")), `/* data.js Component */
-body {
+	assert.equal(normalizeNewLines(ev.getCSSForComponentTree("./vue/test/stubs-e/data.vue").join("\n")), `body {
 	background-color: blue;
 }`);
 });
@@ -323,9 +297,6 @@ test("Vue SFC CSS postcss Plugin", async () => {
 	]);
 	assert.equal(rollupOptions.plugins.length, 2);
 
-	let cssMgr = new InlineCodeManager();
-	ev.setCssManager(cssMgr);
-
 	let files = await ev.findFiles();
 	let bundle = await ev.getBundle(files);
 	let output = await ev.write(bundle);
@@ -340,11 +311,7 @@ body {
 		color: black;
 }`);
 
-	let componentName = ev.getJavaScriptComponentFile("./vue/test/stubs-postcss/data.vue");
-	cssMgr.addComponentForUrl(componentName, "/data/");
-
-	assert.equal(normalizeNewLines(cssMgr.getCodeForUrl("/data/")), `/* data.js Component */
-body {
+	assert.equal(normalizeNewLines(ev.getCSSForComponentTree("./vue/test/stubs-postcss/data.vue").join("\n")), `body {
 	background-color: blue;
 }
 body {
@@ -365,4 +332,48 @@ test("Child component data is per-instance with async serverPrefetch (eleventy-p
 	let data = { page: { url: "/" }, eleventy: { generator: "Eleventy" }, buildawesome: { generator: "Build Awesome" } };
 	assert.equal(await ev.renderComponent(component, data), `<div><!--[--><p>A Eleventy Build Awesome</p><p>B Eleventy Build Awesome</p><p>C Eleventy Build Awesome</p><!--]--></div>`);
 	assert.deepEqual(Object.keys(data), ["page", "eleventy", "buildawesome"]);
+});
+
+test("findFiles returns sorted results", async () => {
+	let ev = new VueCompiler();
+	ev.setCacheDir(".cache");
+	ev.setInputDir(path.relative(".", path.join(import.meta.dirname, "stubs-b")));
+	ev.setIncludesDir("../stubs-c/_includes");
+	ev.resetIgnores();
+
+	let files = await ev.findFiles();
+	assert.deepEqual(files, [...files].sort());
+});
+
+test("Directory comparisons don’t match sibling directories with the same prefix", async () => {
+	let stubs = path.relative(".", path.join(import.meta.dirname, "stubs-prefix"));
+	let ev = new VueCompiler();
+	ev.setCacheDir(".cache");
+	ev.setInputDir(stubs);
+	ev.setIncludesDir("../stubs-prefix-includes");
+	ev.resetIgnores();
+
+	let files = (await ev.findFiles()).map(file => path.relative(stubs, file).split(path.sep).join("/"));
+	assert.deepEqual(files, ["../stubs-prefix-includes/child.vue", "index.vue"]);
+
+	let ev2 = getEvInstance();
+	assert.equal(ev2.isIncludeFile(path.join(ev2.inputDir, "components-legacy", "test.vue")), false);
+});
+
+test("Component tree CSS loads from the rollup output cache", async () => {
+	let ev = new VueCompiler();
+	ev.setCacheDir("vue/.cache/vue-test-readonly");
+	ev.setInputDir("vue/test/stubs-c");
+	ev.setIncludesDir("_includes");
+	ev.createVueComponents(await ev.write(await ev.getBundle()));
+	await ev.writeRollupOutputCache();
+
+	let cached = new VueCompiler();
+	cached.setCacheDir("vue/.cache/vue-test-readonly");
+	cached.setReadOnly(true);
+	assert.ok(cached.hasRollupOutputCache());
+	await cached.loadRollupOutputCache();
+
+	assert.deepEqual(cached.getCSSForComponentTree("./vue/test/stubs-c/data.vue"), ev.getCSSForComponentTree("./vue/test/stubs-c/data.vue"));
+	assert.equal(cached.getCSSForComponentTree("./vue/test/stubs-c/data.vue").length, 3);
 });

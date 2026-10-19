@@ -22,7 +22,7 @@ npm install @11ty/eleventy-plugin-vue
 
 ### Changelog
 
-* `2.0.0` Requires Eleventy v3 and Node.js 22. Renames the `EleventyVue` export to `VueCompiler`.
+* `2.0.0` Requires Eleventy v3 and Node.js 22. Renames the `EleventyVue` export to `VueCompiler`. Component CSS moves to Eleventy’s `css` bundle: the `assets` option, `getVueComponentCssForPage` filter, and `@11ty/eleventy-assets` dependency were removed.
 * `1.0.0` ([Milestone](https://github.com/11ty/eleventy-plugin-vue/milestone/6?closed=1)) Works with Vue 3. Adds Windows support.
 * `0.6.x` ([Milestone](https://github.com/11ty/eleventy-plugin-vue/milestone/5?closed=1))
 * `0.3.1` ([Milestone](https://github.com/11ty/eleventy-plugin-vue/milestone/4?closed=1))
@@ -34,6 +34,7 @@ npm install @11ty/eleventy-plugin-vue
 
 * Builds `*.vue`’s Single File Components, both in the input directory and in Eleventy’s includes directory. `.vue` files in the includes directory are available for import. Same as any Eleventy template syntax, includes do not write files to your output directory.
 * Works with Vue’s Single File Components, including with `scoped` CSS.
+* Component `<style>` blocks (plus those of every imported component) are added to Eleventy’s `css` [bundle](https://www.11ty.dev/docs/plugins/bundle/) for the page.
 * Data from SFC files feeds into the data cascade (similar to front matter)
 * All JavaScript Template Functions (see https://www.11ty.dev/docs/languages/javascript/#javascript-template-functions), Universal Filters, Universal Shortcodes, Universal Paired Shortcodes are available as Vue `methods` (global functions to use in templates and child components). 
   * For example, you can  use the [`url` Universal Filter](https://www.11ty.dev/docs/filters/url/) like `url("/my-url/")` in your Vue templates.
@@ -60,6 +61,14 @@ export default function(eleventyConfig) {
 }
 ```
 
+#### Output component CSS
+
+Use `{% getBundle "css" %}` in a layout:
+
+```html
+<style>{% getBundle "css" %}</style>
+```
+
 #### Customize with Options
 
 ```js
@@ -76,6 +85,12 @@ export default function(eleventyConfig) {
     // Pass in a file or multiple .vue files to limit compilation
     // If this is empty, the plugin will search for all *.vue files
     input: [],
+
+    // Eleventy bundle that component CSS is added to (`false` to opt out)
+    cssBundleName: "css",
+
+    // See https://www.11ty.dev/docs/plugins/bundle/#asset-bucketing
+    cssBundleBucket: undefined,
 
     // Use postcss in the single file components
     rollupPluginVueOptions: {
@@ -100,28 +115,6 @@ export default function(eleventyConfig) {
 ```
 
 For a full list of `rollupPluginVueOptions`, see [`rollup-plugin-vue`’s Options](https://rollup-plugin-vue.vuejs.org/options.html#include).
-
-#### Advanced: Use with `eleventy-assets`
-
-_Compatible with @11ty/eleventy-plugin-vue 0.0.5 and newer._
-
-[Eleventy’s Assets plugin](https://github.com/11ty/eleventy-assets) lets you manage your own Inline CSS or JavaScript. For the first version of the Eleventy Vue plugin, you can reuse an existing CSS code manager from `eleventy-assets` add CSS from your Vue.js Single File Components too.
-
-```js
-import eleventyVue from "@11ty/eleventy-plugin-vue";
-import { InlineCodeManager } from "@11ty/eleventy-assets";
-
-export default function(eleventyConfig) {
-  let myCssManager = new InlineCodeManager();
-
-  eleventyConfig.addPlugin(eleventyVue, {
-    // Re-use an existing `eleventy-assets` Manager
-    assets: {
-      css: myCssManager
-    }
-  });
-}
-```
 
 #### Advanced: Run async things before component render
 

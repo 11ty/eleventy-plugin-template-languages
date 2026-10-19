@@ -65,3 +65,17 @@ test("Vue script syntax error reports the original error (eleventy-plugin-vue#3)
 		return true;
 	});
 });
+
+test("Template strings don’t share a compile cache key with the component", async function () {
+	let elev = new Eleventy(input, undefined, {
+		config: (eleventyConfig) => {
+			eleventyConfig.addPlugin(VuePlugin, {
+				cacheDirectory: path.relative(".", path.join(dirname, "../.cache/build-test/")),
+			});
+		},
+	});
+	await elev.init();
+
+	let { getCacheKey } = elev.eleventyConfig.userConfig.extensionMap.values().find((entry) => entry.key === "vue").compileOptions;
+	ok(getCacheKey("<p>Hi</p>", "./index.vue") !== getCacheKey("", "./index.vue"));
+});

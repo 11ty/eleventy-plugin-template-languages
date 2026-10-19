@@ -6,7 +6,7 @@
 		<title>{{ test }}</title>
 		<style>
 		/* Critical CSS */
-		{{ page.url | getVueComponentCssForPage }}
+		{% getBundle "css" %}
 		</style>
 	</head>
 	<body>
