@@ -1,6 +1,6 @@
-const EleventyWebcPlugin = require("../../eleventyWebcPlugin.js");
+import EleventyWebcPlugin from "../../eleventyWebcPlugin.js";
 
-module.exports = function (eleventyConfig) {
+export default function (eleventyConfig) {
 	eleventyConfig.addPlugin(EleventyWebcPlugin, {
 		components: "webc/test/nested-layouts/_components/**/*.webc"
 	});

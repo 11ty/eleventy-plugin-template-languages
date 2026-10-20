@@ -1,10 +1,14 @@
-const EleventyWebcPlugin = require("../../eleventyWebcPlugin.js");
+import fs from "node:fs";
 
-module.exports = function (eleventyConfig) {
+import EleventyWebcPlugin from "../../eleventyWebcPlugin.js";
+
+const pkg = JSON.parse(fs.readFileSync(new URL("../../package.json", import.meta.url), "utf8"));
+
+export default function (eleventyConfig) {
 	eleventyConfig.addPlugin(EleventyWebcPlugin, {
 		components: "./webc/test/sample-transform/_includes/*.webc",
 		useTransform: true,
-		transformData: { pkg: require("../../package.json") }
+		transformData: { pkg: pkg }
 	});
 
 	return {

@@ -1,6 +1,6 @@
-const EleventyWebcPlugin = require("../../eleventyWebcPlugin.js");
+import EleventyWebcPlugin from "../../eleventyWebcPlugin.js";
 
-module.exports = function (eleventyConfig) {
+export default function (eleventyConfig) {
 	eleventyConfig.addShortcode("testing", () => {
 		// WebC in a shortcode!
 		return "<undefined-component></undefined-component><say-hello></say-hello>";

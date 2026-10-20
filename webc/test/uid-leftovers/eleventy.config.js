@@ -1,8 +1,8 @@
-const EleventyWebcPlugin = require("../../eleventyWebcPlugin.js");
+import EleventyWebcPlugin from "../../eleventyWebcPlugin.js";
 
 let i = 0;
 
-module.exports = function (eleventyConfig) {
+export default function (eleventyConfig) {
 	eleventyConfig.addPlugin(EleventyWebcPlugin, {
 		before: (component) => {
 			component.setUidFunction(function() {

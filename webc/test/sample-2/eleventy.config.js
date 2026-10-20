@@ -1,6 +1,6 @@
-const EleventyWebcPlugin = require("../../eleventyWebcPlugin.js");
+import EleventyWebcPlugin from "../../eleventyWebcPlugin.js";
 
-module.exports = function (eleventyConfig) {
+export default function (eleventyConfig) {
 	eleventyConfig.addPlugin(EleventyWebcPlugin, {
     components: "webc/test/sample-2/_includes/**/*.webc"
   });

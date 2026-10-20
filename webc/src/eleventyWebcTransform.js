@@ -1,4 +1,6 @@
-module.exports = function(eleventyConfig, options = {}) {
+import { WebC } from "@11ty/webc";
+
+export default function(eleventyConfig, options = {}) {
 	let componentsMap = false; // cache the glob search
 
 	eleventyConfig.on("eleventy.before", () => {
@@ -17,7 +19,6 @@ module.exports = function(eleventyConfig, options = {}) {
 		// TODO prevent double processing with the Render plugin with WebC
 		// https://www.11ty.dev/docs/plugins/render/
 		try {
-			const { WebC } = await import("@11ty/webc");
 			let page = new WebC();
 
 			if(componentsMap === false && options.components) {

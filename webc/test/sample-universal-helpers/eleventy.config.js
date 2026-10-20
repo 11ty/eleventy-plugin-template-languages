@@ -1,6 +1,6 @@
-const EleventyWebcPlugin = require("../../eleventyWebcPlugin.js");
+import EleventyWebcPlugin from "../../eleventyWebcPlugin.js";
 
-module.exports = function (eleventyConfig) {
+export default function (eleventyConfig) {
 	eleventyConfig.addPlugin(EleventyWebcPlugin);
 	eleventyConfig.addFilter("testing", function(arg) {
 		return arg + "Always return this" + this.page.url

@@ -1,7 +1,10 @@
-const path = require("node:path");
-const debug = require("debug")("Eleventy:WebC");
+import path from "node:path";
+import { createDebug } from "obug";
+import { WebC, ComponentManager } from "@11ty/webc";
 
-const { evaluateInlineCode } = require("./dynamicScript.js");
+import { evaluateInlineCode } from "./dynamicScript.js";
+
+const debug = createDebug("Eleventy:WebC");
 
 function relativePath(inputPath, newGlob) {
 	// project root
@@ -19,29 +22,26 @@ function relativePath(inputPath, newGlob) {
 function addContextToJavaScriptFunction(data, fn) {
 	let CONTEXT_KEYS = ["eleventy", "page"];
 	return function (...args) {
+		let context = Object.create(this ?? null);
 		for (let key of CONTEXT_KEYS) {
 			if (data && data[key]) {
-				this[key] = data[key];
+				context[key] = data[key];
 			}
 		}
 
-		return fn.call(this, ...args);
+		return fn.call(context, ...args);
 	};
 }
 
-module.exports = function(eleventyConfig, options = {}) {
+export default function(eleventyConfig, options = {}) {
 	// TODO remove this when WebC is moved out of plugin-land into core.
 	eleventyConfig.addTemplateFormats("webc");
 
-	let _WebC;
 	let globalComponentManager;
 	let componentsMap = false; // cache the glob search
 	let scopedHelpers = new Set(options.scopedHelpers);
 
-	eleventyConfig.on("eleventy.before", async () => {
-		// Temporary workaround for ESM in CJS
-		let { WebC, ComponentManager } = await import("@11ty/webc");
-		_WebC = WebC;
+	eleventyConfig.on("eleventy.before", () => {
 		globalComponentManager = new ComponentManager();
 
 		if(options.components) {
@@ -72,7 +72,7 @@ module.exports = function(eleventyConfig, options = {}) {
 							context: combinedContextData,
 							data: combinedContextData,
 						}).catch(e => {
-							debug("Error evaluating dynamic permalink, returning raw string contents instead: %o\n%O", contents, e);
+												debug("Error evaluating dynamic permalink, returning raw string contents instead: %o\n%O", contents, e);
 							return contents;
 						});
 					}
@@ -83,7 +83,7 @@ module.exports = function(eleventyConfig, options = {}) {
 		},
 
 		compile: async function(inputContent, inputPath) {
-			let page = new _WebC();
+			let page = new WebC();
 
 			page.setGlobalComponentManager(globalComponentManager);
 			page.setBundlerMode(true);
@@ -129,7 +129,7 @@ module.exports = function(eleventyConfig, options = {}) {
 				};
 
 				if(data.webc?.components) {
-					setupObject.components = _WebC.getComponentsMap(relativePath(data.page.inputPath, data.webc.components));
+					setupObject.components = WebC.getComponentsMap(relativePath(data.page.inputPath, data.webc.components));
 				}
 
 				if(options.before && typeof options.before === "function") {

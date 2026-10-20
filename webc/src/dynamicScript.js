@@ -1,9 +1,10 @@
+import { parseCode, walkCode, importFromString } from "import-module-string";
+
 // TODO move this upstream into import-module-string
 // Code cribbed from WebC’s attributeSerializer.js
 async function evaluateInlineCode(codeString, options = {}) {
 	let { filePath, context, data } = Object.assign({ data: {} }, options);
 
-	let { parseCode, walkCode, importFromString } = await import("import-module-string");
 	let varsInUse = [];
 	try {
 		let {used} = walkCode(parseCode(codeString));
@@ -45,6 +46,4 @@ async function evaluateInlineCode(codeString, options = {}) {
 	return evaluated;
 }
 
-module.exports =  {
-	evaluateInlineCode
-};
+export { evaluateInlineCode };

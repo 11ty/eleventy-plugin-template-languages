@@ -1,8 +1,11 @@
-const pkg = require("./package.json");
-const templatePlugin = require("./src/eleventyWebcTemplate.js");
-const transformPlugin = require("./src/eleventyWebcTransform.js");
+import fs from "node:fs";
 
-module.exports = function(eleventyConfig, options = {}) {
+import templatePlugin from "./src/eleventyWebcTemplate.js";
+import transformPlugin from "./src/eleventyWebcTransform.js";
+
+const pkg = JSON.parse(fs.readFileSync(new URL("./package.json", import.meta.url), "utf8"));
+
+export default function(eleventyConfig, options = {}) {
 	eleventyConfig.versionCheck(pkg["11ty"].compatibility);
 
 	// Error for removed filters.
