@@ -578,3 +578,12 @@ test("Page with bundled scripts and styles from components", async () => {
 </html>`
 	);
 });
+
+test("Excluded files skip bundling (permalink: false), issue #59", async () => {
+	let elev = new Eleventy("./webc/test/excluded-files/page.webc", "./webc/test/excluded-files/_site", {
+		configPath: "./webc/test/generic.eleventy.config.js"
+	});
+
+	let [result] = await elev.toJSON();
+	assert.equal(normalize(result.content), `<h1>Testing</h1>`);
+});
