@@ -308,6 +308,24 @@ test("Child component data is per-instance with async serverPrefetch (eleventy-p
 	assert.deepEqual(Object.keys(data), ["page", "eleventy", "buildawesome"]);
 });
 
+test("Child component using <script setup>", async () => {
+	let ev = new VueCompiler();
+	ev.setCacheDir("vue/.cache/vue-test-script-setup");
+	ev.setInputDir("vue/test/stubs-script-setup");
+	ev.setIncludesDir("_includes");
+
+	let bundle = await ev.getBundle();
+	ev.createVueComponents(await ev.write(bundle));
+
+	let component = ev.getComponent("./vue/test/stubs-script-setup/index.vue");
+	let html = await ev.renderComponent(component, { page: { url: "/" } });
+	assert.match(html, /^<div><p>\/<\/p><p id="setup-child" data-v-[0-9a-f]+>HELLO hello!<\/p><\/div>$/);
+
+	let css = ev.getCSSForComponentTree("./vue/test/stubs-script-setup/index.vue");
+	assert.equal(css.length, 2);
+	assert.match(css[0], /^#setup-child\[data-v-[0-9a-f]+\] \{ color: teal;/);
+});
+
 test("findFiles returns sorted results", async () => {
 	let ev = new VueCompiler();
 	ev.setCacheDir(".cache");
