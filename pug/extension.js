@@ -44,13 +44,20 @@ const extension = {
 			debugDev('rendering... received arg: %O',		arg)
 			debug(	 'about to render... inputPath: %O', 	inputPath)
 
-			//	TODO: clean up the setup and updating of options
 			const renderOptions = Object.assign(
 				{},
 				{
-					basedir: arg.eleventy.directories.includes,
+					basedir: extension.options.basedir ?? arg.eleventy.directories.includes,
 					filename: inputPath,
 					filters: extension.options.filters,
+					doctype: extension.options.doctype,
+					pretty: extension.options.pretty,
+					self: extension.options.self,
+					debug: extension.options.debug,
+					compileDebug: extension.options.compileDebug,
+					globals: extension.options.globals,
+					cache: extension.options.cache,
+					inlineRuntimeFunctions: extension.options.inlineRuntimeFunctions,
 				},
 				arg
 			)
