@@ -50,9 +50,9 @@ export default function(eleventyConfig, options = {}) {
 	});
 
 	let templateConfig;
-  eleventyConfig.on("eleventy.config", (cfg) => {
-    templateConfig = cfg;
-  });
+	eleventyConfig.on("eleventy.config", (cfg) => {
+		templateConfig = cfg;
+	});
 
 	eleventyConfig.addExtension("webc", {
 		outputFileExtension: "html",
@@ -72,7 +72,7 @@ export default function(eleventyConfig, options = {}) {
 							context: combinedContextData,
 							data: combinedContextData,
 						}).catch(e => {
-												debug("Error evaluating dynamic permalink, returning raw string contents instead: %o\n%O", contents, e);
+							debug("Error evaluating dynamic permalink, returning raw string contents instead: %o\n%O", contents, e);
 							return contents;
 						});
 					}
