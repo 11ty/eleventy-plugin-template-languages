@@ -12,8 +12,7 @@ Full documentation is at [11ty.dev/docs/languages/webc/](https://www.11ty.dev/do
 npm install @11ty/eleventy-plugin-webc
 ```
 
-* `0.12.x` requires Eleventy `3.0.0` or newer and Node.js 18 or newer
-* This package is ESM-only: `require()` from a CommonJS configuration file needs Node.js 20.19+ or 22.12+.
+* `0.12.x` requires Eleventy `3.0.0` or newer and Node.js 22.18 or newer
 
 ## Features
 
