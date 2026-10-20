@@ -610,3 +610,12 @@ test("Global data from component, $data (pull #80)", async () => {
 	
 </dl>`);
 });
+
+test("renderFile of WebC in a permalink: false page, issue #59", async () => {
+	let elev = new Eleventy("./webc/test/render-file-permalink-false/page.njk", "./webc/test/render-file-permalink-false/_site", {
+		configPath: "./webc/test/render-file-permalink-false/eleventy.config.js"
+	});
+
+	let [result] = await elev.toJSON();
+	assert.equal(normalize(result.content), `<h1>Testing</h1>`);
+});
