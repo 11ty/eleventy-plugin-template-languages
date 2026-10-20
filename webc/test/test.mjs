@@ -587,3 +587,26 @@ test("Excluded files skip bundling (permalink: false), issue #59", async () => {
 	let [result] = await elev.toJSON();
 	assert.equal(normalize(result.content), `<h1>Testing</h1>`);
 });
+
+test("Global data from component, $data (pull #80)", async () => {
+	let elev = new Eleventy("./webc/test/global-data/page.webc", "./webc/test/global-data/_site", {
+		configPath: "./webc/test/global-data/eleventy.config.js"
+	});
+
+	let [result] = await elev.toJSON();
+
+	assert.equal(normalize(result.content), `<dl>
+	
+		<dt>key1</dt>
+		<dd>val1</dd>
+	
+
+		<dt>key2</dt>
+		<dd>val2</dd>
+	
+
+		<dt>key3</dt>
+		<dd>val3</dd>
+	
+</dl>`);
+});

@@ -1,0 +1,6 @@
+<dl>
+	<template webc:nokeep webc:for="entry of $data.index">
+		<dt @text="entry[0]"></dt>
+		<dd @text="entry[1]"></dd>
+	</template>
+</dl>
