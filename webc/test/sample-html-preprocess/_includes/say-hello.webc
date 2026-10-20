@@ -1,0 +1,1 @@
+HELLO<span @html="$data.webcPkg.version"></span>

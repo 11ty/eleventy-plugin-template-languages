@@ -1,0 +1,6 @@
+---
+layout: base.webc
+---
+Base
+<template webc:nokeep @raw="content"></template>
+<style webc:keep @raw="getCss(page.url)"></style>

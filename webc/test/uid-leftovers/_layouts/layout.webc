@@ -1,0 +1,8 @@
+<!doctype html>
+<html>
+	<head>
+		<title></title>
+		<style webc:keep @html="getCSS(page.url)"></style>
+	</head>
+	<body></body>
+</html>
